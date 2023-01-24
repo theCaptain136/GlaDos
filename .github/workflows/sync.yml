@@ -12,6 +12,6 @@ jobs:
         with:
           source_repo: "theCaptain136/GlaDos"
           source_branch: "refs/remotes/source/*"
-          destination_repo: "EpitechPromo2025/B-FUN-500-BER-5-2-glados-pablo-elias.herrmann.git"
+          destination_repo: "EpitechPromo2025/B-FUN-500-BER-5-2-glados-pablo-elias.herrmann"
           destination_branch: "refs/heads/*"
           destination_ssh_private_key: ${{ secrets.BERLIN_PRIVATE_KEY }}
