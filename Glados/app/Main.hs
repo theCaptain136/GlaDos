@@ -34,46 +34,62 @@ data Expression =   Value {value :: Value, valueName :: String} |
                     Smaller {firstValueSmaller :: Expression, secondValueSmaller :: Expression} |
                     Condition {ifValue :: Expression, thenExpression :: Expression, elseExpression :: Expression}
 
-evaluatePlus :: Value -> Value -> Value
-evaluatePlus (ValueError err) _ = (ValueError err)
-evaluatePlus _ (ValueError err) = (ValueError err)
-evaluatePlus (ValueInt int1) (ValueInt int2) = (ValueInt (int1 + int2))
-evaluatePlus _ _ = (ValueError (Error 84))
+evaluatePlus :: (Value, [Symbol]) -> (Value, [Symbol]) -> (Value, [Symbol])
+evaluatePlus ((ValueError err), symbols) (_, _) = ((ValueError err), symbols)
+evaluatePlus (_, symbols) ((ValueError err), _) = ((ValueError err), symbols)
+evaluatePlus ((ValueInt int1), symbols) ((ValueInt int2), _) = ((ValueInt (int1 + int2)), symbols)
+evaluatePlus (_, symbols) (_, _) = ((ValueError (Error 84)), symbols)
 
-evaluateMinus :: Value -> Value -> Value
-evaluateMinus (ValueError err) _ = (ValueError err)
-evaluateMinus _ (ValueError err) = (ValueError err)
-evaluateMinus (ValueInt int1) (ValueInt int2) = (ValueInt (int1 - int2))
-evaluateMinus _ _ = (ValueError (Error 84))
+evaluateMinus :: (Value, [Symbol]) -> (Value, [Symbol]) -> (Value, [Symbol])
+evaluateMinus ((ValueError err), symbols) (_, _) = ((ValueError err), symbols)
+evaluateMinus (_, symbols) ((ValueError err), _) = ((ValueError err), symbols)
+evaluateMinus ((ValueInt int1), symbols) ((ValueInt int2), _) = ((ValueInt (int1 - int2)), symbols)
+evaluateMinus (_, symbols) (_, _) = ((ValueError (Error 84)), symbols)
 
-evaluateTimes :: Value -> Value -> Value
-evaluateTimes (ValueError err) _ = (ValueError err)
-evaluateTimes _ (ValueError err) = (ValueError err)
-evaluateTimes (ValueInt int1) (ValueInt int2) = (ValueInt (int1 * int2))
-evaluateTimes _ _ = (ValueError (Error 84))
+evaluateTimes :: (Value, [Symbol]) -> (Value, [Symbol]) -> (Value, [Symbol])
+evaluateTimes ((ValueError err), symbols) (_, _) = ((ValueError err), symbols)
+evaluateTimes (_, symbols) ((ValueError err), _) = ((ValueError err), symbols)
+evaluateTimes ((ValueInt int1), symbols) ((ValueInt int2), _) = ((ValueInt (int1 * int2)), symbols)
+evaluateTimes (_, symbols) (_, _) = ((ValueError (Error 84)), symbols)
 
-evaluateDivided :: Value -> Value -> Value
-evaluateDivided (ValueError err) _ = (ValueError err)
-evaluateDivided _ (ValueError err) = (ValueError err)
-evaluateDivided (ValueInt int) (ValueInt 0) = (ValueError (Error 84))
-evaluateDivided (ValueInt int1) (ValueInt int2) = (ValueInt (div int1 int2))
-evaluateDivided _ _ = (ValueError (Error 84))
+evaluateDivided :: (Value, [Symbol]) -> (Value, [Symbol]) -> (Value, [Symbol])
+evaluateDivided ((ValueError err), symbols) (_, _) = ((ValueError err), symbols)
+evaluateDivided (_, symbols) ((ValueError err), _) = ((ValueError err), symbols)
+evaluateDivided ((ValueInt int), symbols) ((ValueInt 0), _) = ((ValueError (Error 84)), symbols)
+evaluateDivided ((ValueInt int1), symbols) ((ValueInt int2), _) = ((ValueInt (div int1 int2)), symbols)
+evaluateDivided (_, symbols) (_, _) = ((ValueError (Error 84)), symbols)
 
-evaluateModulo :: Value -> Value -> Value
-evaluateModulo (ValueError err) _ = (ValueError err)
-evaluateModulo _ (ValueError err) = (ValueError err)
-evaluateModulo (ValueInt int) (ValueInt 0) = (ValueError (Error 84))
-evaluateModulo (ValueInt int1) (ValueInt int2) = (ValueInt (mod int1 int2))
-evaluateModulo _ _ = (ValueError (Error 84))
+evaluateModulo :: (Value, [Symbol]) -> (Value, [Symbol]) -> (Value, [Symbol])
+evaluateModulo ((ValueError err), symbols) (_, _) = ((ValueError err), symbols)
+evaluateModulo (_, symbols) ((ValueError err), _) = ((ValueError err), symbols)
+evaluateModulo ((ValueInt int), symbols) ((ValueInt 0), _) = ((ValueError (Error 84)), symbols)
+evaluateModulo ((ValueInt int1), symbols) ((ValueInt int2), _) = ((ValueInt (mod int1 int2)), symbols)
+evaluateModulo (_, symbols) (_, _) = ((ValueError (Error 84)), symbols)
 
-evaluateExpression :: Expression -> Int -> Value
-evaluateExpression _ 100 = (ValueError (Error 84))
-evaluateExpression (Value val name) recursion = val
-evaluateExpression (Plus exp1 exp2) recursion = evaluatePlus (evaluateExpression exp1 (recursion + 1)) (evaluateExpression exp2 (recursion + 1))
-evaluateExpression (Minus exp1 exp2) recursion = evaluateMinus (evaluateExpression exp1 (recursion + 1)) (evaluateExpression exp2 (recursion + 1))
-evaluateExpression (Times exp1 exp2) recursion = evaluateTimes (evaluateExpression exp1 (recursion + 1)) (evaluateExpression exp2 (recursion + 1))
-evaluateExpression (Divided exp1 exp2) recursion = evaluateDivided (evaluateExpression exp1 (recursion + 1)) (evaluateExpression exp2 (recursion + 1))
-evaluateExpression (Modulo exp1 exp2) recursion = evaluateModulo (evaluateExpression exp1 (recursion + 1)) (evaluateExpression exp2 (recursion + 1))
+returnValue :: Expression -> Value
+returnValue (Value val _) = val
+returnValue _ = (ValueError (Error 84))
+
+findValue :: String -> [Symbol] -> Value
+findValue name1 [] = (ValueError (Error 84))
+findValue name1 (x:xs) | name x == name1 = returnValue (rep x)
+findValue name1 (x:xs) | otherwise = findValue name1 xs
+
+evaluateValue :: Value -> String -> [Symbol] -> Value
+evaluateValue (ValueInt int) _ symbols = (ValueInt int)
+evaluateValue (ValueBool bool) _ symbols = (ValueBool bool)
+evaluateValue (ValueError (Error 1)) name1 symbols = findValue name1 symbols
+evaluateValue val _ _ = val
+
+evaluateExpression :: Expression -> Int -> [Symbol] -> (Value, [Symbol])
+evaluateExpression _ 100 symbols = ((ValueError (Error 84)), symbols)
+evaluateExpression (Value val name1) recursion symbols = ((evaluateValue val name1 symbols) , symbols)
+evaluateExpression (Plus exp1 exp2) recursion symbols = evaluatePlus (evaluateExpression exp1 (recursion + 1) symbols) (evaluateExpression exp2 (recursion + 1) symbols)
+evaluateExpression (Minus exp1 exp2) recursion symbols = evaluateMinus (evaluateExpression exp1 (recursion + 1) symbols) (evaluateExpression exp2 (recursion + 1) symbols)
+evaluateExpression (Times exp1 exp2) recursion symbols = evaluateTimes (evaluateExpression exp1 (recursion + 1) symbols) (evaluateExpression exp2 (recursion + 1) symbols)
+evaluateExpression (Divided exp1 exp2) recursion symbols = evaluateDivided (evaluateExpression exp1 (recursion + 1) symbols) (evaluateExpression exp2 (recursion + 1) symbols)
+evaluateExpression (Modulo exp1 exp2) recursion symbols = evaluateModulo (evaluateExpression exp1 (recursion + 1) symbols) (evaluateExpression exp2 (recursion + 1) symbols)
+evaluateExpression (Define name1 exp1) recursion symbols = ((ValueError (Error 0)), symbols ++ [Symbol name1 exp1])
 
 main :: IO ()
-main = print (evaluateExpression (Plus (Value (ValueInt 5) "first") (Value (ValueInt 4) "second")) 0)
+main = print (fst (evaluateExpression (Plus (Value (ValueError (Error 1)) "first") (Value (ValueInt 4) "second")) 0 [(Symbol "first" (Value (ValueInt 3) ""))]))
