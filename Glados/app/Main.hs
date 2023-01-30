@@ -35,24 +35,32 @@ data Expression =   Value {value :: Value, valueName :: String} |
                     Condition {ifValue :: Expression, thenExpression :: Expression, elseExpression :: Expression}
 
 evaluatePlus :: (Value, [Symbol]) -> (Value, [Symbol]) -> (Value, [Symbol])
+evaluatePlus ((ValueError (Error 0)), symbols) (_, _) = ((ValueError (Error 84)), symbols)
+evaluatePlus (_, symbols) ((ValueError (Error 0)), _) = ((ValueError (Error 84)), symbols)
 evaluatePlus ((ValueError err), symbols) (_, _) = ((ValueError err), symbols)
 evaluatePlus (_, symbols) ((ValueError err), _) = ((ValueError err), symbols)
 evaluatePlus ((ValueInt int1), symbols) ((ValueInt int2), _) = ((ValueInt (int1 + int2)), symbols)
 evaluatePlus (_, symbols) (_, _) = ((ValueError (Error 84)), symbols)
 
 evaluateMinus :: (Value, [Symbol]) -> (Value, [Symbol]) -> (Value, [Symbol])
+evaluateMinus ((ValueError (Error 0)), symbols) (_, _) = ((ValueError (Error 84)), symbols)
+evaluateMinus (_, symbols) ((ValueError (Error 0)), _) = ((ValueError (Error 84)), symbols)
 evaluateMinus ((ValueError err), symbols) (_, _) = ((ValueError err), symbols)
 evaluateMinus (_, symbols) ((ValueError err), _) = ((ValueError err), symbols)
 evaluateMinus ((ValueInt int1), symbols) ((ValueInt int2), _) = ((ValueInt (int1 - int2)), symbols)
 evaluateMinus (_, symbols) (_, _) = ((ValueError (Error 84)), symbols)
 
 evaluateTimes :: (Value, [Symbol]) -> (Value, [Symbol]) -> (Value, [Symbol])
+evaluateTimes ((ValueError (Error 0)), symbols) (_, _) = ((ValueError (Error 84)), symbols)
+evaluateTimes (_, symbols) ((ValueError (Error 0)), _) = ((ValueError (Error 84)), symbols)
 evaluateTimes ((ValueError err), symbols) (_, _) = ((ValueError err), symbols)
 evaluateTimes (_, symbols) ((ValueError err), _) = ((ValueError err), symbols)
 evaluateTimes ((ValueInt int1), symbols) ((ValueInt int2), _) = ((ValueInt (int1 * int2)), symbols)
 evaluateTimes (_, symbols) (_, _) = ((ValueError (Error 84)), symbols)
 
 evaluateDivided :: (Value, [Symbol]) -> (Value, [Symbol]) -> (Value, [Symbol])
+evaluateDivided ((ValueError (Error 0)), symbols) (_, _) = ((ValueError (Error 84)), symbols)
+evaluateDivided (_, symbols) ((ValueError (Error 0)), _) = ((ValueError (Error 84)), symbols)
 evaluateDivided ((ValueError err), symbols) (_, _) = ((ValueError err), symbols)
 evaluateDivided (_, symbols) ((ValueError err), _) = ((ValueError err), symbols)
 evaluateDivided ((ValueInt int), symbols) ((ValueInt 0), _) = ((ValueError (Error 84)), symbols)
@@ -60,6 +68,8 @@ evaluateDivided ((ValueInt int1), symbols) ((ValueInt int2), _) = ((ValueInt (di
 evaluateDivided (_, symbols) (_, _) = ((ValueError (Error 84)), symbols)
 
 evaluateModulo :: (Value, [Symbol]) -> (Value, [Symbol]) -> (Value, [Symbol])
+evaluateModulo ((ValueError (Error 0)), symbols) (_, _) = ((ValueError (Error 84)), symbols)
+evaluateModulo (_, symbols) ((ValueError (Error 0)), _) = ((ValueError (Error 84)), symbols)
 evaluateModulo ((ValueError err), symbols) (_, _) = ((ValueError err), symbols)
 evaluateModulo (_, symbols) ((ValueError err), _) = ((ValueError err), symbols)
 evaluateModulo ((ValueInt int), symbols) ((ValueInt 0), _) = ((ValueError (Error 84)), symbols)
