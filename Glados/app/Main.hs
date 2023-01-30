@@ -20,6 +20,13 @@ data Symbol = Symbol {name :: String, rep :: Expression}
 
 data Error = Error Int deriving Show
 
+-- Error list:
+-- 0 = OK (used as a return value for define)
+-- 1 = Value is stored as a symbol
+-- 80 = Value not defined
+-- 81 = recursion limit reached
+-- 84 = invalid mathematic action
+
 data Value = ValueInt Int | ValueBool Bool| ValueError Error deriving Show
 
 data Expression =   Value {value :: Value, valueName :: String} |
@@ -78,10 +85,10 @@ evaluateModulo (_, symbols) (_, _) = ((ValueError (Error 84)), symbols)
 
 returnValue :: Expression -> Value
 returnValue (Value val _) = val
-returnValue _ = (ValueError (Error 84))
+returnValue _ = (ValueError (Error 80))
 
 findValue :: String -> [Symbol] -> Value
-findValue name1 [] = (ValueError (Error 84))
+findValue name1 [] = (ValueError (Error 80))
 findValue name1 (x:xs) | name x == name1 = returnValue (rep x)
 findValue name1 (x:xs) | otherwise = findValue name1 xs
 
@@ -92,7 +99,7 @@ evaluateValue (ValueError (Error 1)) name1 symbols = findValue name1 symbols
 evaluateValue val _ _ = val
 
 evaluateExpression :: Expression -> Int -> [Symbol] -> (Value, [Symbol])
-evaluateExpression _ 100 symbols = ((ValueError (Error 84)), symbols)
+evaluateExpression _ 100 symbols = ((ValueError (Error 81)), symbols)
 evaluateExpression (Value val name1) recursion symbols = ((evaluateValue val name1 symbols) , symbols)
 evaluateExpression (Plus exp1 exp2) recursion symbols = evaluatePlus (evaluateExpression exp1 (recursion + 1) symbols) (evaluateExpression exp2 (recursion + 1) symbols)
 evaluateExpression (Minus exp1 exp2) recursion symbols = evaluateMinus (evaluateExpression exp1 (recursion + 1) symbols) (evaluateExpression exp2 (recursion + 1) symbols)
