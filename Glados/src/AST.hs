@@ -25,12 +25,13 @@ data Error = Error Int deriving Show
 -- 82 = invalid comparison
 -- 83 = invalid mathematic action
 -- 84 = invalid use data type
+-- 85 = invalid number of args
 
 data Value = ValueInt Int | ValueBool Bool| ValueError Error deriving Show
 
 data Expression =   Value {value :: Value, valueName :: String} |
-                    SymbolExpression {symbolName :: String, args :: [Expression]} |
-                    Lambda {args :: [Expression], function :: [Expression]} |
+                    SymbolExpression {symbolName :: String, argsSymbol :: [Symbol]} |
+                    Lambda {argsLambda :: [Symbol], function :: [Expression]} |
                     Plus {firstValuePlus :: Expression, secondValuePlus :: Expression} |
                     Minus {firstValueMinus :: Expression, secondValueMinus :: Expression} |
                     Divided {firstValueDivided :: Expression, secondValueDivided :: Expression} |
