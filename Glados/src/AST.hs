@@ -24,6 +24,7 @@ data Error = Error Int deriving Show
 -- 81 = recursion limit reached
 -- 82 = invalid comparison
 -- 83 = invalid mathematic action
+-- 84 = invalid use data type
 
 data Value = ValueInt Int | ValueBool Bool| ValueError Error deriving Show
 
