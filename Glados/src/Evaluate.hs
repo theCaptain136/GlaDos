@@ -121,10 +121,10 @@ addArgs (x:xs) (y:ys) (z:zs) = addArgs (((Symbol (name y) (rep z) ) : x) : xs) y
 
 evaluateSymbol :: Symbol -> [Symbol] -> [[Symbol]] -> Int -> (Value, [[Symbol]])
 evaluateSymbol (Symbol name1 (Value (ValueError (Error err)) _)) _ symbols _ = ((ValueError (Error err)), symbols)
-evaluateSymbol (Symbol name1 (Value val name2)) [] symbols recursion = ((evaluateValue val "" symbols), symbols)
-evaluateSymbol (Symbol name1 (Value val name2)) args symbols recursion = ((ValueError (Error 85)), symbols)
 evaluateSymbol (Symbol name1 (Lambda args1 expressions)) args2 symbols recursion  | length args1 == length args2 = evaluateLambda (addArgs symbols args1 args2) expressions recursion
                                                                             | otherwise = ((ValueError (Error 85)), symbols)
+evaluateSymbol (Symbol name1 exp1) [] symbols recursion = (evaluateExpression exp1 (recursion + 1) symbols)
+evaluateSymbol (Symbol name1 exp1) args symbols recursion = ((ValueError (Error 85)), symbols)
 
 removeLastArray :: (Value, [[Symbol]]) -> (Value, [[Symbol]])
 removeLastArray (val, (x:xs)) = (val, xs)

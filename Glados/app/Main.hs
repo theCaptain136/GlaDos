@@ -20,4 +20,4 @@ import Evaluate
 --             testFunc2
 
 main :: IO ()
-main = print (fst (evaluateExpression (Plus (Value (ValueError (Error 1)) "first") (Value (ValueInt 4) "second")) 0 [[(Symbol "first" (Value (ValueInt 3) ""))]]))
+main = print (fst (evaluateExpression (SymbolExpression "a" [(Symbol "" (Value (ValueInt 3) ""))]) 0 [[(Symbol "a" (Lambda [(Symbol "b" (Value (ValueError (Error 1)) ""))] [(Define "c" (Value (ValueInt 2) "")), (Plus (Value (ValueError (Error 1)) "c") (Value (ValueError (Error 1)) "b"))]))]]))
