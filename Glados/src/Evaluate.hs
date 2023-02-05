@@ -57,6 +57,16 @@ returnValue :: Expression -> Value
 returnValue (Value val _) = val
 returnValue _ = (ValueError (Error 84))
 
+findSymbol :: String -> [[Symbol]] -> Symbol
+findSymbol name1 [] = (Symbol "" (Value (ValueError (Error 80)) ""))
+findSymbol name1 ([]:xs) = findSymbol name1 xs
+findSymbol name1 (x:xs) = findSymbol2 name1 x xs
+
+findSymbol2 :: String -> [Symbol] -> [[Symbol]] -> Symbol
+findSymbol2 name1 [] rest = findSymbol name1 rest
+findSymbol2 name1 (x:xs) rest | name x == name1 = x
+findSymbol2 name1 (x:xs) rest | otherwise = findSymbol2 name1 xs rest
+
 findValue :: String -> [[Symbol]] -> Value
 findValue name1 [] = (ValueError (Error 80))
 findValue name1 ([]:xs) = findValue name1 xs
@@ -100,18 +110,36 @@ evaluateSmaller ((ValueInt val1), symbols) ((ValueInt val2), _)
                 | otherwise = ((ValueBool False), symbols)
 evaluateSmaller (_, symbols) _ = ((ValueError (Error 82)), symbols)
 
+evaluateLambda :: [[Symbol]] -> [Expression] -> Int -> (Value, [[Symbol]])
+evaluateLambda symbols _ 100 = ((ValueError (Error 81)), symbols)
+evaluateLambda symbols (x:[]) recursion = evaluateExpression x (recursion + 1) symbols
+evaluateLambda symbols (x:xs) recursion = evaluateLambda (snd (evaluateExpression x recursion symbols)) xs (recursion + 1)
+
+addArgs :: [[Symbol]] -> [Symbol] -> [Symbol] -> [[Symbol]]
+addArgs symbols [] [] = symbols
+addArgs (x:xs) (y:ys) (z:zs) = addArgs (((Symbol (name y) (rep z) ) : x) : xs) ys zs
+
+evaluateSymbol :: Symbol -> [Symbol] -> [[Symbol]] -> Int -> (Value, [[Symbol]])
+evaluateSymbol (Symbol name1 (Value (ValueError (Error err)) _)) _ symbols _ = ((ValueError (Error err)), symbols)
+evaluateSymbol (Symbol name1 (Lambda args1 expressions)) args2 symbols recursion  | length args1 == length args2 = evaluateLambda (addArgs symbols args1 args2) expressions recursion
+                                                                            | otherwise = ((ValueError (Error 85)), symbols)
+evaluateSymbol (Symbol name1 exp1) [] symbols recursion = (evaluateExpression exp1 (recursion + 1) symbols)
+evaluateSymbol (Symbol name1 exp1) args symbols recursion = ((ValueError (Error 85)), symbols)
+
 removeLastArray :: (Value, [[Symbol]]) -> (Value, [[Symbol]])
 removeLastArray (val, (x:xs)) = (val, xs)
 
 evaluateExpression :: Expression -> Int -> [[Symbol]] -> (Value, [[Symbol]])
 evaluateExpression _ 100 symbols = ((ValueError (Error 81)), symbols)
 evaluateExpression (Value val name1) recursion symbols = ((evaluateValue val name1 symbols) , symbols)
-evaluateExpression (Plus exp1 exp2) recursion symbols = removeLastArray (evaluatePlus (evaluateExpression exp1 (recursion + 1) ([] : symbols)) (evaluateExpression exp2 (recursion + 1) ([] ++ symbols)))
-evaluateExpression (Minus exp1 exp2) recursion symbols = removeLastArray (evaluateMinus (evaluateExpression exp1 (recursion + 1) ([] ++ symbols)) (evaluateExpression exp2 (recursion + 1) ([] ++ symbols)))
-evaluateExpression (Times exp1 exp2) recursion symbols = removeLastArray (evaluateTimes (evaluateExpression exp1 (recursion + 1) ([] ++ symbols)) (evaluateExpression exp2 (recursion + 1) ([] ++ symbols)))
-evaluateExpression (Divided exp1 exp2) recursion symbols = removeLastArray (evaluateDivided (evaluateExpression exp1 (recursion + 1) ([] ++ symbols)) (evaluateExpression exp2 (recursion + 1) ([] ++ symbols)))
-evaluateExpression (Modulo exp1 exp2) recursion symbols = removeLastArray (evaluateModulo (evaluateExpression exp1 (recursion + 1) ([] ++ symbols)) (evaluateExpression exp2 (recursion + 1) ([] ++ symbols)))
+evaluateExpression (Plus exp1 exp2) recursion symbols = removeLastArray (evaluatePlus (evaluateExpression exp1 (recursion + 1) ([] : symbols)) (evaluateExpression exp2 (recursion + 1) ([] : symbols)))
+evaluateExpression (Minus exp1 exp2) recursion symbols = removeLastArray (evaluateMinus (evaluateExpression exp1 (recursion + 1) ([] : symbols)) (evaluateExpression exp2 (recursion + 1) ([] : symbols)))
+evaluateExpression (Times exp1 exp2) recursion symbols = removeLastArray (evaluateTimes (evaluateExpression exp1 (recursion + 1) ([] : symbols)) (evaluateExpression exp2 (recursion + 1) ([] : symbols)))
+evaluateExpression (Divided exp1 exp2) recursion symbols = removeLastArray (evaluateDivided (evaluateExpression exp1 (recursion + 1) ([] : symbols)) (evaluateExpression exp2 (recursion + 1) ([] : symbols)))
+evaluateExpression (Modulo exp1 exp2) recursion symbols = removeLastArray (evaluateModulo (evaluateExpression exp1 (recursion + 1) ([] : symbols)) (evaluateExpression exp2 (recursion + 1) ([] : symbols)))
 evaluateExpression (Define name1 exp1) recursion (x:xs) = ((ValueError (Error 0)), (((Symbol name1 exp1):x) : xs))
-evaluateExpression (Condition exp1 exp2 exp3) recursion symbols = removeLastArray (evaluateCondition (evaluateExpression exp1 (recursion + 1) ([] ++ symbols)) exp2 exp3 recursion)
-evaluateExpression (Equal exp1 exp2) recursion symbols = removeLastArray (evaluateEqual (evaluateExpression exp1 (recursion + 1) ([] ++ symbols)) (evaluateExpression exp2 (recursion + 1) ([] ++ symbols)))
-evaluateExpression (Smaller exp1 exp2) recursion symbols = removeLastArray (evaluateSmaller (evaluateExpression exp1 (recursion + 1) ([] ++ symbols)) (evaluateExpression exp2 (recursion + 1) ([] ++ symbols)))
+evaluateExpression (Condition exp1 exp2 exp3) recursion symbols = removeLastArray (evaluateCondition (evaluateExpression exp1 (recursion + 1) ([] : symbols)) exp2 exp3 recursion)
+evaluateExpression (Equal exp1 exp2) recursion symbols = removeLastArray (evaluateEqual (evaluateExpression exp1 (recursion + 1) ([] : symbols)) (evaluateExpression exp2 (recursion + 1) ([] : symbols)))
+evaluateExpression (Smaller exp1 exp2) recursion symbols = removeLastArray (evaluateSmaller (evaluateExpression exp1 (recursion + 1) ([] : symbols)) (evaluateExpression exp2 (recursion + 1) ([] : symbols)))
+evaluateExpression (Lambda args expressions) recursion (x:xs) = removeLastArray (evaluateLambda ([]:(args ++ x):xs) expressions recursion)
+evaluateExpression (SymbolExpression name1 args) recursion symbols = removeLastArray (evaluateSymbol (findSymbol name1 symbols) args ([] : symbols) (recursion + 1))
