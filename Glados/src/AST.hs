@@ -35,6 +35,7 @@ data Error = Error Int deriving Show
 -- 83 = invalid mathematic action
 -- 84 = invalid use data type
 -- 85 = invalid number of args
+-- 86 = invalid syntax
 
 -- Value will be every type of value possible and then can be used for patternmatching during evaluation.
 -- e.g.: Plus expects two values as input, but with patternmatching inside the function it will be determined if you try add a Int to a Bool.

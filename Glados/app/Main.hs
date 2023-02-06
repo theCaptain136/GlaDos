@@ -12,12 +12,14 @@ import Translator
 import Parser
 import AST
 import Evaluate
-
-
--- main :: IO ()
--- main =  do  someFunc
---             testFunc1
---             testFunc2
+import System.Environment
+import System.IO
 
 main :: IO ()
-main = print (fst (evaluateExpression (SymbolExpression "a" [(Symbol "" (Value (ValueInt 3) ""))]) 0 [[(Symbol "a" (Lambda [(Symbol "b" (Value (ValueError (Error 1)) ""))] [(Define "c" (Value (ValueInt 2) "")), (Plus (Value (ValueError (Error 1)) "c") (Value (ValueError (Error 1)) "b"))]))]]))
+main =  do
+        args <- getArgs
+        let path = head args
+        inputAsFile <- readFile path
+        let str = inputAsFile
+        let a = parser str []
+        print (fst (evaluateExpression (createExpression a) 0 []))

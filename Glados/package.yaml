@@ -20,6 +20,7 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/githubuser/Glados#readme>
 
 dependencies:
+- text
 - base >= 4.7 && < 5
 
 ghc-options:
@@ -46,6 +47,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - Glados
+    - text
 
 tests:
   Glados-test:
@@ -57,3 +59,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - Glados
+    - text
