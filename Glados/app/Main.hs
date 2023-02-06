@@ -23,5 +23,3 @@ main =  do
         let str = inputAsFile
         let a = parser str []
         print (fst (evaluateExpression (createExpression a) 0 []))
-
-        -- print (fst (evaluateExpression (Plus (Value (ValueError (Error 1)) "first") (Value (ValueInt 4) "second")) 0 [(Symbol "first" (Value (ValueInt 3) ""))]))
