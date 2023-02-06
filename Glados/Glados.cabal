@@ -25,6 +25,8 @@ source-repository head
 
 library
   exposed-modules:
+      AST
+      Evaluate
       Lib
       Parser
       Translator
@@ -35,6 +37,7 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , text
   default-language: Haskell2010
 
 executable Glados-exe
@@ -47,6 +50,7 @@ executable Glados-exe
   build-depends:
       Glados
     , base >=4.7 && <5
+    , text
   default-language: Haskell2010
 
 test-suite Glados-test
@@ -60,4 +64,5 @@ test-suite Glados-test
   build-depends:
       Glados
     , base >=4.7 && <5
+    , text
   default-language: Haskell2010
