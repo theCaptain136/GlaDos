@@ -28,6 +28,7 @@ test:
 	./glados Glados/test/trippleFunctionCall.scm
 	./glados Glados/test/singleFunctionCall.scm
 	./glados Glados/test/FailOnMissingBrackets.scm
+	./glados Glados/test/defineCall.scm
 
 re: fclean all
 

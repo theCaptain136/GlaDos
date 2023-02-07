@@ -14,12 +14,17 @@ import AST
 import Evaluate
 import System.Environment
 import System.IO
+import Loop
 
 main :: IO ()
-main =  do
-        args <- getArgs
-        let path = head args
-        inputAsFile <- readFile path
-        let str = inputAsFile
-        let a = parser str []
-        print (fst (evaluateExpression (createExpression a) 0 []))
+main = do
+  args <- getArgs
+  if args == []
+    then
+      inputLoop [[]]
+    else do
+      let path = head args
+      inputAsFile <- readFile path
+      let str = inputAsFile
+      let a = parser str []
+      loop a [[]] 0

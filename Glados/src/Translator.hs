@@ -20,13 +20,13 @@ testFunc2 :: IO()
 testFunc2 = putStrLn("hello from Translator")
 
 isBool :: String -> Bool
-isBool "#f" = True
 isBool "#t" = True
+isBool "#f" = True
 isBool _ = False
 
 toBool :: String -> Bool
-toBool "#f" = True
-toBool "#t" = False
+toBool "#t" = True
+toBool "#f" = False
 
 onlyNumbers :: String -> Bool
 onlyNumbers [] = True
