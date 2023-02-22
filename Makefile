@@ -9,6 +9,8 @@ NAME     =    glados
 
 RM         =    @rm -f
 
+CFLAGS = -Wno-everything
+
 $(NAME):
 	stack build --copy-bins --local-bin-path .
 	@mv Glados-exe $@

@@ -11,6 +11,8 @@ module Translator
     translator,
     createExpression,
     getNext,
+    getName,
+    strToSybol,
     ) where
 
 import Data.Text.IO (getLine)
@@ -50,11 +52,13 @@ getNext (x:xs) save c = getNext xs (save ++ [x]) c
 translator :: [String] -> Int -> Int -> Expression
 translator [] depth x | depth /= 0 = (Value (ValueError (Error 86)) "error")
 translator ((h:hs):xs) depth x  | depth <= 0 && h == ')' = (Value (ValueError (Error 86)) "error")
-                                | h == '(' && x == 1 = translator xs (depth+1) 0
+                                | h == '(' = translator xs (depth+1) 0 -- maybe need to add x == 0 in condition
                                 | h == ')' = translator xs (depth-1) 1
+                                -- | h == '(' =    let res = getNext ("(":xs) [] 0
+                                --                     in
+                                --                         translator (fst res) (depth+1) 0
 
-translator (x:xs) depth 1   | (onlyNumbers x) == True = Value (ValueInt (stringToInt x)) ""
-                            | (isBool x) == True = Value (ValueBool (toBool x)) ""
+
 
 translator ("+":a:b:xs) depth 0 = let   n = (getNext (a:b:xs) [] 0)
                                         n2 = ( getNext (snd n) [] 0)
@@ -101,7 +105,42 @@ translator ("if":a:b:xs) depth 0 = let  n = (getNext (a:b:xs) [] 0)
 translator ("define":a:b:xs) depth 0 = let  n = (getNext (a:b:xs) [] 0)
                                             n2 = ( getNext (snd n) [] 0)
                                     in
-                                        (Define (head (fst n)) (translator (fst n2) depth 1)) -- Plus function
+                                        (defineCall (fst n) (fst n2) 0)
+                                        -- (Define (fst name) (translator (fst n2) depth 1)) -- Plus function
 
-translator (x:xs) depth e = (Value (ValueError (Error 1)) x)
+translator (x:xs) depth 0 = SymbolExpression x (strToSybol xs 0)    -- custom functions
+
+translator (x:xs) depth 1   | (onlyNumbers x) == True = Value (ValueInt (stringToInt x)) "" -- only const values + variables
+                            | (isBool x) == True = Value (ValueBool (toBool x)) ""
+                            | otherwise = Value (ValueError (Error 1)) x
+
+
+-- put into lamda function
+-- translator (x:xs) depth 2
+
 translator _ _ _ = (Value (ValueError (Error 900)) "error")
+
+strToSybol :: [String] -> Int -> [Symbol]
+strToSybol [] c = []
+strToSybol ("(":rs) 0 = strToSybol rs 1
+strToSybol (")":[]) _ = []
+strToSybol (h:rs) c | onlyNumbers h = ((Symbol "" (Value (ValueInt (stringToInt h)) "")):strToSybol rs (c+1))
+                    | isBool h = ((Symbol "" (Value (ValueBool (toBool h)) "")):strToSybol rs (c+1))
+                    | h /= "(" && h /= ")" = (Symbol h (Value (ValueError (Error 1)) h):strToSybol rs (c+1))
+                    | h == "(" = let    exp = getNext (h:rs) [] 0
+                                in
+                                    ((Symbol "" (createExpression (fst exp))):strToSybol (snd exp) (c+1))
+
+defineCall :: [String] -> [String] -> Int -> Expression
+defineCall [] _ _ = (Value (ValueError (Error 90)) "")
+defineCall a b 0    | (head a) == "(" = let    name = getName (a)
+                                        in
+                                            (Define (fst name) (Lambda (strToSybol (snd name) 0) [(createExpression b)]))
+                    | onlyNumbers (head a) == False && isBool (head a) == False = let name = getName a
+                                                                    in
+                                                                        (Define (head a) (createExpression b))
+
+getName :: [String] -> (String, [String])
+getName ("(":rs) = getName rs
+getName (h:rs) = (h, ("(":rs))
+getName [] = ("", [])

@@ -16,8 +16,20 @@ import System.Environment
 import System.IO
 import Loop
 
+getRep :: Symbol -> Expression
+getRep symbol = rep symbol
+
+getSyName :: Symbol -> String
+getSyName symbol = name symbol
+
+getItemAtIndex :: [Symbol] -> Int -> Symbol
+getItemAtIndex xs idx
+  | idx >= 0 && idx < length xs = (xs !! idx)
+  | otherwise = Symbol "error" (Value(ValueError (Error 90)) "")
+
 main :: IO ()
 main = do
+  print (fst (evaluateExpression (SymbolExpression "add" [(Symbol "" (Value (ValueInt 5) "")), (Symbol "" (Plus (Value (ValueInt 1) "") (Value (ValueInt 1) "")))]) 0 [[Symbol "add" (Lambda [(Symbol "a" (Value (ValueError (Error 1)) "b")), (Symbol "b" (Value (ValueError (Error 1)) "b"))] [(Plus (Value (ValueError (Error 1)) "a") (Value (ValueError (Error 1)) "b"))])]]))
   args <- getArgs
   if args == []
     then
@@ -28,3 +40,9 @@ main = do
       let str = inputAsFile
       let a = parser str []
       loop a [[]] 0
+
+syPrint :: [Symbol] -> IO()
+syPrint [] = putStr ""
+syPrint (x:xs) = do
+  print (getSyName x)
+  syPrint xs

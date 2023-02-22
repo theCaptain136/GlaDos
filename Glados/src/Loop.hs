@@ -40,7 +40,7 @@ handleValue value =
 
 singleExpression :: [String] -> [[Symbol]] -> Int -> (Value, [String], [[Symbol]])
 singleExpression x env c = let  res = getNext x [] 0
-                                exp = evaluateExpression (createExpression x) c env
+                                exp = evaluateExpression (createExpression (fst res)) c env
     in
         ((fst exp), (snd res), (snd exp))
 
@@ -48,8 +48,10 @@ loop :: [String] -> [[Symbol]] -> Int -> IO ()
 loop [] _ _ = putStr ""
 loop input env c = do 
     let (res, rest, newEnv) = (singleExpression input env c)
+    let t = getNext input [] 0
+    print (fst t)
     case res of
-        ValueError (Error code) -> if code < 80
+        ValueError (Error code) -> if False--code < 80
                                     then putStr ""
                                     else do
                                         print res
@@ -59,7 +61,7 @@ loop input env c = do
                                     then putStr "#t"
                                     else do 
                                         putStr "#f"
-    loop rest (env++newEnv) c
+    loop rest (newEnv) c
 
 activeLoop :: [String] -> [[Symbol]] -> (Value, [[Symbol]])
 activeLoop [] _ = ((ValueError (Error 86)), ([[]]))
@@ -77,7 +79,7 @@ inputLoop env = do
             let input = parser line []
             let (val, e) = activeLoop input env
             case val of
-                ValueError (Error code) -> if code < 80
+                ValueError (Error code) -> if False--code < 80
                                             then putStr ""
                                             else do
                                                 print val
@@ -87,4 +89,4 @@ inputLoop env = do
                                             then print "#t"
                                             else do
                                                 print "#f"
-            inputLoop (env ++ e)
+            inputLoop (e)
