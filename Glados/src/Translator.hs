@@ -103,16 +103,16 @@ translator ("define":a:b:xs) depth 0 = let  n = (getNext (a:b:xs) [] 0)
                                         (defineCall (fst n) (fst n2) 0)
 
 translator ("lambda":a:b:xs) depth 0 = let  n = (getNext (a:b:xs) [] 0)
-                                            n2 = (getNext (snd n) [] 0)
+                                            n2 = expArray (snd n) []
                                             arg = (strToSymbol (fst n) 0)
-                                            sym =   if empty (snd n2)
+                                            sym =   if null (snd n2)
                                                         then Nothing
                                                         else Just (strToSymbol (snd n2) 0)
                                             res = case sym of
                                                     Nothing -> arg
                                                     Just s -> giveNames arg s
                                     in
-                                        (Lambda res [(createExpression (fst n2))])
+                                        (Lambda res (fst n2) )
 
 translator (x:xs) depth 0 = SymbolExpression x (strToSymbol xs 0)    -- custom functions
 
@@ -121,6 +121,13 @@ translator (x:xs) depth 1   | (onlyNumbers x) == True = Value (ValueInt (stringT
                             | otherwise = Value (ValueError (Error 1)) x
 
 translator _ _ _ = (Value (ValueError (Error 900)) "error")
+
+expArray :: [String] -> [Expression] -> ([Expression], [String])
+expArray [] e = (e, [])
+expArray (")":xs) e = (e, xs)
+expArray (x:xs) e = let    (exp, rest) = getNext (x:xs) [] 0
+                        in
+                            expArray rest (e ++ [createExpression exp])
 
 empty :: [String] -> Bool
 empty (")":[]) = True
