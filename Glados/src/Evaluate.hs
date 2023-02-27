@@ -53,9 +53,9 @@ evaluateModulo ((ValueInt int), symbols) ((ValueInt 0), _) = ((ValueError (Error
 evaluateModulo ((ValueInt int1), symbols) ((ValueInt int2), _) = ((ValueInt (mod int1 int2)), symbols)
 evaluateModulo (_, symbols) (_, _) = ((ValueError (Error 83)), symbols)
 
-returnValue :: Expression -> Value
-returnValue (Value val _) = val
-returnValue _ = (ValueError (Error 84))
+-- returnValue :: Expression -> Value
+-- returnValue (Value val _) = val
+-- returnValue _ = (ValueError (Error 84))
 
 findSymbol :: String -> [[Symbol]] -> Symbol
 findSymbol name1 [] = (Symbol "" (Value (ValueError (Error 80)) ""))
@@ -67,20 +67,20 @@ findSymbol2 name1 [] rest = findSymbol name1 rest
 findSymbol2 name1 (x:xs) rest | name x == name1 = x
 findSymbol2 name1 (x:xs) rest | otherwise = findSymbol2 name1 xs rest
 
-findValue :: String -> [[Symbol]] -> Value
-findValue name1 [] = (ValueError (Error 80))
-findValue name1 ([]:xs) = findValue name1 xs
-findValue name1 (x:xs) = findValue2 name1 x xs
+findValue :: String -> [[Symbol]] -> [[Symbol]] -> Value
+findValue name1 [] symbols = (ValueError (Error 80))
+findValue name1 ([]:xs) symbols = findValue name1 xs symbols
+findValue name1 (x:xs) symbols = findValue2 name1 x xs symbols
 
-findValue2 :: String -> [Symbol] -> [[Symbol]] -> Value
-findValue2 name1 [] rest = findValue name1 rest
-findValue2 name1 (x:xs) rest | name x == name1 = returnValue (rep x)
-findValue2 name1 (x:xs) rest | otherwise = findValue2 name1 xs rest
+findValue2 :: String -> [Symbol] -> [[Symbol]] -> [[Symbol]] -> Value
+findValue2 name1 [] rest symbols = findValue name1 rest symbols
+findValue2 name1 (x:xs) rest symbols | name x == name1 = (fst (evaluateExpression (rep x) 0 symbols))
+findValue2 name1 (x:xs) rest symbols | otherwise = findValue2 name1 xs rest symbols
 
 evaluateValue :: Value -> String -> [[Symbol]] -> Value
 evaluateValue (ValueInt int) _ symbols = (ValueInt int)
 evaluateValue (ValueBool bool) _ symbols = (ValueBool bool)
-evaluateValue (ValueError (Error 1)) name1 symbols = findValue name1 symbols
+evaluateValue (ValueError (Error 1)) name1 symbols = findValue name1 symbols symbols
 evaluateValue val _ _ = val
 
 evaluateCondition :: (Value, [[Symbol]]) -> Expression -> Expression -> Int -> (Value, [[Symbol]])

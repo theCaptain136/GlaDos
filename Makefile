@@ -9,6 +9,8 @@ NAME     =    glados
 
 RM         =    @rm -f
 
+CFLAGS = -Wno-everything
+
 $(NAME):
 	stack build --copy-bins --local-bin-path .
 	@mv Glados-exe $@
@@ -23,11 +25,14 @@ fclean: clean
 	$(RM) $(NAME)-exe
 
 test:
-	./glados Glados/test/doubleFunctionCallLhs.scm
-	./glados Glados/test/doubleFunctionCallRhs.scm
-	./glados Glados/test/trippleFunctionCall.scm
-	./glados Glados/test/singleFunctionCall.scm
-	./glados Glados/test/FailOnMissingBrackets.scm
+	./glados Glados/test/doubleFunctionCallLhs6.scm
+	./glados Glados/test/doubleFunctionCallRhs6.scm
+	./glados Glados/test/trippleFunctionCall8.scm
+	./glados Glados/test/singleFunctionCall4.scm
+	./glados Glados/test/FailOnMissingBrackets80.scm
+	./glados Glados/test/defineCall43.scm
+	./glados Glados/test/lamdaWithValue3.scm
+	./glados Glados/test/customFunctions5nl6.scm
 
 re: fclean all
 

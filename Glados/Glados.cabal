@@ -28,6 +28,7 @@ library
       AST
       Evaluate
       Lib
+      Loop
       Parser
       Translator
   other-modules:
