@@ -33,6 +33,7 @@ test:
 	./glados Glados/test/defineCall43.scm
 	./glados Glados/test/lamdaWithValue3.scm
 	./glados Glados/test/customFunctions5nl6.scm
+	./glados Glados/test/lamdaWithMultimpleCalls7nl3.scm
 
 re: fclean all
 
