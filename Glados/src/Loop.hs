@@ -49,9 +49,8 @@ loop [] _ _ = putStr ""
 loop input env c = do 
     let (res, rest, newEnv) = (singleExpression input env c)
     let t = getNext input [] 0
-    print (fst t)
     case res of
-        ValueError (Error code) -> if False--code < 80
+        ValueError (Error code) -> if code < 80
                                     then putStr ""
                                     else do
                                         print res
@@ -79,7 +78,7 @@ inputLoop env = do
             let input = parser line []
             let (val, e) = activeLoop input env
             case val of
-                ValueError (Error code) -> if False--code < 80
+                ValueError (Error code) -> if code < 80
                                             then putStr ""
                                             else do
                                                 print val
