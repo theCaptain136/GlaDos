@@ -28,8 +28,8 @@ eval (env, stack) (Times expr1 expr2) = removeLastArray (applyBinop ([]:env) sta
 eval (env, stack) (Divided expr1 expr2) = removeLastArray (applyBinop ([]:env) stack div expr1 expr2)
 eval (env, stack) (Modulo expr1 expr2) = removeLastArray (applyBinop ([]:env) stack mod expr1 expr2)
 eval ((x:xs), stack) (Define name expr) = ((((Symbol name expr):x) : xs), (Value (ValueError (Error 0)) "") : stack)
-eval (env, stack) (Equal expr1 expr2) = removeLastArray (applyBoolop ([]:env) stack (==) expr1 expr2)
-eval (env, stack) (Smaller expr1 expr2) = removeLastArray (applyBoolop ([]:env) stack (<) expr1 expr2)
+eval (env, stack) (Equal expr1 expr2) = removeLastArray (applyBoolop ([]:env) stack "equal" expr1 expr2)
+eval (env, stack) (Smaller expr1 expr2) = removeLastArray (applyBoolop ([]:env) stack "smaller" expr1 expr2)
 eval (env, stack) (Condition ifExpr thenExpr elseExpr) = removeLastArray (applyCond ([]:env) stack (snd (eval (([]:env), stack) ifExpr)))
 
 applyCond :: [[Symbol]] -> [Value] -> Expression -> Expression -> ([[Symbol]], [Value])
@@ -51,7 +51,7 @@ operate _ _ _ = (ValueError (Error 83))
 
 -- Apply a binary operator to the top two values on the stack
 applyBinop :: [[Symbol]] -> [Value] -> (Int -> Int -> Int) -> Expression -> Expression -> ([[Symbol]], [Value])
-applyBinop env stack op expr1 expr2 = (env, (operate op v1 v2) : stack)
+applyBinop env stack op expr1 expr2 = (env'', (operate (op) v1 v2) : (tail (tail restStack)))
   where
     v1 = fst restStack
     v2 = snd restStack
@@ -60,9 +60,27 @@ applyBinop env stack op expr1 expr2 = (env, (operate op v1 v2) : stack)
       where
         (env', restStack2) = eval (env, stack) expr2
 
+operateBool :: String -> Value -> Value -> Value
+operateBool _ (ValueError err) _ = (ValueError err)
+operateBool _ _ (ValueError err) = (ValueError err)
+operateBool "Equal" (ValueInt v1) (ValueInt v2)
+      | v1 == v2 = (ValueBool True)
+      | otherwise = (ValueBool False)
+operateBool "Smaller" (ValueInt v1) (ValueInt v2)
+      | v1 < v2 = (ValueBool True)
+      | otherwise = (ValueBool False)
+operateBool "Equal" (ValueBool v1) (ValueBool v2)
+      | v1 == v2 = (ValueBool True)
+      | otherwise = (ValueBool False)
+operateBool _ _ _ = (ValueError (Error 82))
+
 -- Apply a boolean operator to the top two values on the stack
-applyBoolop :: Environment -> Stack -> (Int -> Int -> Bool) -> Expression -> Expression -> (Environment, Stack)
-applyBoolop env stack op expr1 expr2 = (env, Value (ValueBool (op v1 v2)) "" : stack)
+applyBoolop :: [[Symbol]] -> [Value] -> String -> Expression -> Expression -> ([[Symbol]], [Value])
+applyBinop env stack op expr1 expr2 = (env'', (operateBool (op) v1 v2) : (tail (tail restStack)))
   where
-    (env', Value v2 _) = eval (env, stack) expr2
-    (env'', Value v1 _) = eval (env', stack) expr1
+    v1 = fst restStack
+    v2 = snd restStack
+    where
+      (env'', restStack) = eval (env, restStack2) expr1
+      where
+        (env', restStack2) = eval (env, stack) expr2
