@@ -11,7 +11,8 @@ import Lib
 import Translator
 import Parser
 import AST
-import Evaluate
+-- import Evaluate
+import EvaluateStack
 import System.Environment
 import System.IO
 import Loop
