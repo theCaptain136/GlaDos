@@ -19,9 +19,14 @@ evaluateExpression exp' _ env = (head (snd result), fst result)
 removeLastArray :: ([[Symbol]], [Value]) -> ([[Symbol]], [Value])
 removeLastArray ((_:xs), stack) = (xs, stack)
 
--- Evaluate an expression in the given environment and stack
 eval :: ([[Symbol]], [Value]) -> Expression -> ([[Symbol]], [Value])
+eval (env, stack) (Value (ValueError (Error 1)) name') = findSymbol env env stack name' []
 eval (env, stack) (Value val _) = (env, val : stack)
+eval (env, stack) (Lambda [] (last : [])) = eval (env, stack) last
+eval ((x:xs), stack) (Lambda [] ((Define name' expr) : rest)) = eval ((((Symbol name' expr) : x) : xs), stack) (Lambda [] rest)
+eval (env, stack) (Lambda [] (_ : rest)) = eval (env, stack) (Lambda [] rest)
+eval (env, stack) (Lambda args functions) = removeLastArray (eval (args : env, stack) (Lambda [] functions))
+eval (env, stack) (SymbolExpression name' args) = findSymbol env env stack name' args
 eval (env, stack) (Plus expr1 expr2) = removeLastArray (applyop ([]:env) stack "Plus" expr1 expr2)
 eval (env, stack) (Minus expr1 expr2) = removeLastArray (applyop ([]:env) stack "Minus" expr1 expr2)
 eval (env, stack) (Times expr1 expr2) = removeLastArray (applyop ([]:env) stack "Times" expr1 expr2)
@@ -32,12 +37,21 @@ eval (env, stack) (Equal expr1 expr2) = removeLastArray (applyop ([]:env) stack 
 eval (env, stack) (Smaller expr1 expr2) = removeLastArray (applyop ([]:env) stack "Smaller" expr1 expr2)
 eval (env, stack) (Condition ifExpr thenExpr elseExpr) = removeLastArray (applyCond ([]:env) (snd (eval (([]:env), stack) ifExpr)) thenExpr elseExpr)
 
+findSymbol :: [[Symbol]] -> [[Symbol]] -> [Value] -> String -> [Symbol] -> ([[Symbol]], [Value])
+findSymbol [] env' stack _ _ = (env', (ValueError (Error 80)) : stack)
+findSymbol ([]:xs) env' stack name' args = findSymbol xs env' stack name' args
+findSymbol (((Symbol name'' (Lambda args' exprs)) : _) : _) env' stack name' args
+          | name' == name'' && length args == length args' = removeLastArray (eval (env', stack) (Lambda args' exprs))
+          | name' == name'' && otherwise = (env', (ValueError (Error 85)) : stack)
+findSymbol (((Symbol name'' expr) : _) : _) env' stack name' [] | name'' == name'  = eval (env', stack) expr
+findSymbol (((Symbol name'' _) : _) : _) env' stack name' _ | name'' == name' = (env', (ValueError (Error 85)) : stack)
+findSymbol ((_ : xs) : xss) env' stack name' args = findSymbol (xs : xss) env' stack name' args
+
 applyCond :: [[Symbol]] -> [Value] -> Expression -> Expression -> ([[Symbol]], [Value])
 applyCond env ((ValueBool True):xs) thenExpr _ = eval (env, xs) thenExpr
 applyCond env ((ValueBool False):xs) _ elseExpr = eval (env, xs) elseExpr
 applyCond env ((_):xs) _ _ = (env, ((ValueError (Error 82)) : xs))
 
--- Apply a binary operator to the top two values on the stack
 applyop :: [[Symbol]] -> [Value] -> String -> Expression -> Expression -> ([[Symbol]], [Value])
 applyop env stack op expr1 expr2 = (env''', (operate op v1 v2) : restStack'')
   where
