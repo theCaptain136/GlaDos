@@ -13,11 +13,13 @@ jobs:
     - name: Install dependencies
       run: make re
 
-    - name: Run check
+    - name: Run tests
       run: make test
+      if: ${{ success() || failure() && steps.build.outputs.return-code != 2 }}
 
     - name: Run distcheck
       run: make restack
-
-    - name: Run check
+      
+    - name: Run tests
       run: make test
+      if: ${{ success() || failure() && steps.build.outputs.return-code != 2 }}
