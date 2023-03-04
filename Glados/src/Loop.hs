@@ -54,6 +54,7 @@ loop input env c = do
         ValueError (Error code) -> if code < 80
                                     then putStr ""
                                     else do
+                                        print res
                                         exitWith (ExitFailure 1)
         ValueInt (value) -> do
                                 print value
@@ -82,6 +83,7 @@ inputLoop env = do
                 ValueError (Error code) -> if code < 80
                                             then putStr ""
                                             else do
+                                                print val
                                                 exitWith (ExitFailure 1)
                 ValueInt (value) -> do
                                         print value

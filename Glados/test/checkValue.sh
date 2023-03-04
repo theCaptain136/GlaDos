@@ -18,14 +18,18 @@ STRINGS=("./Glados/test/doubleFunctionCallLhs6.scm"
         "./Glados/test/lamdaWithMultimpleCalls30.scm"
         "./Glados/test/FailOnMissingBrackets1.scm")
 
+# Define a flag for failing tests
+FAIL=0
+
 # Loop through the array of strings and call the executable with each string
 for s in "${STRINGS[@]}"; do
     echo "Calling executable with string: $s"
-    RESPONSE=$($EXECUTABLE "$s")
+    RESPONSE=$(timeout 2s $EXECUTABLE "$s" 2>/dev/null)
     EXIT_CODE=$?
     if [[ $EXIT_CODE -gt 0 ]]; then
         if [[ $s != "./Glados/test/FailOnMissingBrackets1.scm" ]]; then
             echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
+            FAIL=1
         fi
     else
         NUMBER=$(echo "$RESPONSE" | tr -dc '0-9')
@@ -68,3 +72,9 @@ for s in "${STRINGS[@]}"; do
         fi
     fi
 done
+
+if [[ $FAIL == 1 ]]; then
+    exit 1
+else
+    exit 0
+fi
