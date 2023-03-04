@@ -21,7 +21,7 @@ STRINGS=("./Glados/test/doubleFunctionCallLhs6.scm"
 # Loop through the array of strings and call the executable with each string
 for s in "${STRINGS[@]}"; do
     echo "Calling executable with string: $s"
-    RESPONSE=$($EXECUTABLE "$s")
+    RESPONSE=$(timeout 5s $EXECUTABLE "$s" 2>/dev/null)
     EXIT_CODE=$?
     if [[ $EXIT_CODE -gt 0 ]]; then
         if [[ $s != "./Glados/test/FailOnMissingBrackets1.scm" ]]; then
