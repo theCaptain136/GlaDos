@@ -12,7 +12,8 @@ module Loop (
 
 import AST
 import Translator
-import Evaluate
+-- import Evaluate
+import EvaluateStack
 import Parser
 import System.IO (isEOF)
 
