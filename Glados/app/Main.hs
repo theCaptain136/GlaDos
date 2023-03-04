@@ -11,11 +11,11 @@ import Lib
 import Translator
 import Parser
 import AST
--- import Evaluate
-import EvaluateStack
+import Evaluate
 import System.Environment
 import System.IO
 import Loop
+import System.Exit (exitSuccess)
 
 getRep :: Symbol -> Expression
 getRep symbol = rep symbol
@@ -40,6 +40,7 @@ main = do
       let str = inputAsFile
       let a = parser str []
       loop a [[]] 0
+      exitSuccess
 
 syPrint :: [Symbol] -> IO()
 syPrint [] = putStr ""
