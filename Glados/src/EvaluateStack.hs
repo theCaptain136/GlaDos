@@ -5,7 +5,7 @@
 -- EvaluateStack
 --
 
-module EvaluateStack (
+module Evaluate (
     evaluateExpression
     ) where
 

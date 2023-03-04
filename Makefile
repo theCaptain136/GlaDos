@@ -19,7 +19,7 @@ SRC	=	Glados/app/Main.hs			\
 
 SRC_STACK	=	Glados/app/Main.hs			\
 				Glados/src/AST.hs			\
-				Glados/src/Evaluate.hs		\
+				Glados/src/EvaluateStack.hs	\
 				Glados/src/Lib.hs			\
 				Glados/src/Loop.hs			\
 				Glados/src/Parser.hs		\
@@ -32,10 +32,10 @@ OBJ_STACK	=	$(patsubst %.hs,%.o,$(SRC_STACK)) $(patsubst %.hs,%.hi,$(SRC_STACK))
 CFLAGS = -Wno-everything
 
 all:
-	ghc -dynamic $(SRC)
+	ghc -dynamic $(SRC) -o $(NAME)
 
 stack:
-	ghc -dynamic $(SRC_STACK)
+	ghc -dynamic $(SRC_STACK) -o $(NAME)
 
 clean:
 	$(RM) -r $(OBJ)
@@ -43,19 +43,12 @@ clean:
 
 fclean: clean
 	$(RM) $(NAME)
-	$(RM) $(NAME)-exe
 
 test:
-	./glados Glados/test/doubleFunctionCallLhs6.scm
-	./glados Glados/test/doubleFunctionCallRhs6.scm
-	./glados Glados/test/trippleFunctionCall8.scm
-	./glados Glados/test/singleFunctionCall4.scm
-	./glados Glados/test/FailOnMissingBrackets80.scm
-	./glados Glados/test/defineCall43.scm
-	./glados Glados/test/lamdaWithValue3.scm
-	./glados Glados/test/customFunctions5nl6.scm
-	./glados Glados/test/lamdaWithMultimpleCalls7nl3.scm
+	./Glados/test/checkValue.sh
 
 re: fclean all
+
+restack: fclean stack
 
 .PHONY: all clean fclean re

@@ -12,10 +12,10 @@ module Loop (
 
 import AST
 import Translator
--- import Evaluate
-import EvaluateStack
+import Evaluate
 import Parser
 import System.IO (isEOF)
+import System.Exit (exitWith, ExitCode(..))
 
 ifValueIsInt :: Value -> Bool
 ifValueIsInt (ValueInt _) = True
@@ -54,7 +54,7 @@ loop input env c = do
         ValueError (Error code) -> if code < 80
                                     then putStr ""
                                     else do
-                                        print res
+                                        exitWith (ExitFailure 1)
         ValueInt (value) -> do
                                 print value
         ValueBool (value) ->    if value == True
@@ -82,7 +82,7 @@ inputLoop env = do
                 ValueError (Error code) -> if code < 80
                                             then putStr ""
                                             else do
-                                                print val
+                                                exitWith (ExitFailure 1)
                 ValueInt (value) -> do
                                         print value
                 ValueBool (value) ->    if (value == True)
