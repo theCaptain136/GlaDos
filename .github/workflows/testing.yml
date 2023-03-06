@@ -1,0 +1,25 @@
+name: Makefile CI
+
+on: push
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: make re
+
+    - name: Run tests
+      run: make test
+      if: ${{ success() || failure() && steps.build.outputs.return-code != 2 }}
+
+    - name: Run distcheck
+      run: make restack
+      
+    - name: Run tests
+      run: make test
+      if: ${{ success() || failure() && steps.build.outputs.return-code != 2 }}

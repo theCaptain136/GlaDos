@@ -9,19 +9,46 @@ NAME     =    glados
 
 RM         =    @rm -f
 
-$(NAME):
-	stack build --copy-bins --local-bin-path .
-	@mv Glados-exe $@
+SRC	=	Glados/app/Main.hs			\
+		Glados/src/AST.hs			\
+		Glados/src/Evaluate.hs		\
+		Glados/src/Lib.hs			\
+		Glados/src/Loop.hs			\
+		Glados/src/Parser.hs		\
+		Glados/src/Translator.hs
 
-all: $(NAME)
+SRC_STACK	=	Glados/app/Main.hs			\
+				Glados/src/AST.hs			\
+				Glados/src/EvaluateStack.hs	\
+				Glados/src/Lib.hs			\
+				Glados/src/Loop.hs			\
+				Glados/src/Parser.hs		\
+				Glados/src/Translator.hs
+
+OBJ	=	$(patsubst %.hs,%.o,$(SRC)) $(patsubst %.hs,%.hi,$(SRC))
+
+OBJ_STACK	=	$(patsubst %.hs,%.o,$(SRC_STACK)) $(patsubst %.hs,%.hi,$(SRC_STACK))
+
+CFLAGS = -Wno-everything
+
+all:
+	ghc -dynamic $(SRC) -o $(NAME)
+
+stack:
+	ghc -dynamic $(SRC_STACK) -o $(NAME)
 
 clean:
-	$(RM) -r .stack-work
+	$(RM) -r $(OBJ)
+	$(RM) -r $(OBJ_STACK)
 
 fclean: clean
 	$(RM) $(NAME)
-	$(RM) $(NAME)-exe
+
+test:
+	./Glados/test/checkValue.sh
 
 re: fclean all
+
+restack: fclean stack
 
 .PHONY: all clean fclean re
