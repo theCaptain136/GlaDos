@@ -8,15 +8,8 @@ NC='\033[0m' # No Color
 EXECUTABLE="./glados"
 
 # Define an array of strings to pass to the executable
-STRINGS=("./Glados/test/doubleFunctionCallLhs6.scm"
-        "./Glados/test/doubleFunctionCallRhs6.scm"
-        "./Glados/test/trippleFunctionCall8.scm"
-        "./Glados/test/singleFunctionCall4.scm"
-        "./Glados/test/defineCall43.scm"
-        "./Glados/test/lamdaWithValue3.scm"
-        "./Glados/test/customFunctions9.scm"
-        "./Glados/test/lamdaWithMultimpleCalls30.scm"
-        "./Glados/test/FailOnMissingBrackets1.scm")
+DIRECTORY="./Glados/test"
+STRINGS=("$DIRECTORY"/*.scm)
 
 # Define a flag for failing tests
 FAIL=0
@@ -30,44 +23,70 @@ for s in "${STRINGS[@]}"; do
         if [[ $s != "./Glados/test/FailOnMissingBrackets1.scm" ]]; then
             echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             FAIL=1
+        elif [[ $EXIT_CODE == 1 ]]; then
+            echo -e "${GREEN}Test Successful!${NC}"
         fi
     else
         NUMBER=$(echo "$RESPONSE" | tr -dc '0-9')
         if [[ $s == "./Glados/test/doubleFunctionCallLhs6.scm" ]]; then
             if [[ $NUMBER == 6 ]]; then
                 echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             fi
         elif [[ $s == "./Glados/test/doubleFunctionCallRhs6.scm" ]]; then
             if [[ $NUMBER == 6 ]]; then
                 echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             fi
         elif [[ $s == "./Glados/test/trippleFunctionCall8.scm" ]]; then
             if [[ $NUMBER == 8 ]]; then
                 echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             fi
         elif [[ $s == "./Glados/test/singleFunctionCall4.scm" ]]; then
             if [[ $NUMBER == 4 ]]; then
                 echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             fi
         elif [[ $s == "./Glados/test/defineCall43.scm" ]]; then
             if [[ $NUMBER == 43 ]]; then
                 echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             fi
         elif [[ $s == "./Glados/test/lamdaWithValue3.scm" ]]; then
             if [[ $NUMBER == 3 ]]; then
                 echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             fi
         elif [[ $s == "./Glados/test/customFunctions9.scm" ]]; then
             if [[ $NUMBER == 9 ]]; then
                 echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             fi
         elif [[ $s == "./Glados/test/lamdaWithMultimpleCalls30.scm" ]]; then
             if [[ $NUMBER == 30 ]]; then
                 echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             fi
-        elif [[ $s == "./Glados/test/FailOnMissingBrackets1.scm" ]]; then
-            if [[ $EXIT_CODE == 1 ]]; then
+        elif [[ $s == "./Glados/test/infixNotation12.scm" ]]; then
+            if [[ $NUMBER == 12 ]]; then
                 echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
+            fi
+        elif [[ $s == "./Glados/test/infixNotationTripple30.scm" ]]; then
+            if [[ $NUMBER == 30 ]]; then
+                echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
+            fi
+        elif [[ $s == "./Glados/test/infixNotationDoubleLhs20.scm" ]]; then
+            if [[ $NUMBER == 20 ]]; then
+                echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
+            fi
+        elif [[ $s == "./Glados/test/infixNotationDoubleRhs20.scm" ]]; then
+            if [[ $NUMBER == 20 ]]; then
+                echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             fi
         fi
     fi
