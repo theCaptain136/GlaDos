@@ -77,7 +77,7 @@ inputLoop env = do
         then return ()
         else do
             line <- getLine
-            let input = parser line []
+            let input = (convert (parser line []))
             let (val, e) = activeLoop input env
             case val of
                 ValueError (Error code (Empty 0)) -> if code < 80

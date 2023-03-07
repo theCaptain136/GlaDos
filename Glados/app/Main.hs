@@ -33,7 +33,7 @@ main = do
       let path = head args
       inputAsFile <- readFile path
       let str = inputAsFile
-      let a = parser str []
+      let a = (convert (parser str []))
       loop a [[]] 0
       exitSuccess
 
