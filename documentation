@@ -1,13 +1,9 @@
 -- Define the syntax of the Glados language
 syntax Program ::= Expr+ ;
 
-syntax Expr
-    ::= "(" Value
-    | ArithmeticExpr
-    | IfExpr
-    | DefineExpr
-    | LambdaExpr
-    | Symbol ")" ;
+syntax Expr ::= "(" Expression ")" ;
+
+syntax Expression ::= Value | ArithmeticExpr | IfExpr | DefineExpr | LambdaExpr | Symbol ;
 
 syntax Value ::= Int | Bool
 syntax Int ::= [0-9]+ ;
@@ -20,7 +16,8 @@ syntax Mod ::= "mod" | "%" ;
 syntax Div ::= "div" | "/" ;
 syntax Equal ::= "eq?" | "=" | "==" ;
 syntax ArithmeticExpr ::= Operator Expr Expr ;
-syntax Operator ::= "+" | "-" | "*" | "div" | "mod" | Equal | "<" ;
+syntax ArithmeticExpr ::= Expr Operator Expr ;
+syntax Operator ::= "+" | "-" | "*" | Div | Mod | Equal | "<" ;
 
 -- Example: (+ 1 2)
 -- Example: (- 5 3)
@@ -32,6 +29,7 @@ syntax Operator ::= "+" | "-" | "*" | "div" | "mod" | Equal | "<" ;
 -- Example: (< 5 10)
 
 syntax IfExpr ::= "if" Expr Expr Expr ;
+syntax IfExpr ::= "if" Expr "then" Expr "else" Expr ;
 
 -- Example: (if #t 1 2)
 
@@ -68,4 +66,4 @@ syntax Symbol ::= [a-zA-Z0-9]+ Expr*
 (define square (lambda (z) (* z z)))
 (define x 5)
 (define y 7)
-(if (< x y) (square x) (square y))
+(if (< x y) then (square x) else (square y))
