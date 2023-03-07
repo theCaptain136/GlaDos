@@ -80,7 +80,7 @@ inputLoop env = do
             let input = (convert (parser line []))
             let (val, e) = activeLoop input env
             case val of
-                ValueError (Error code (Empty 0)) -> if code < 80
+                ValueError (Error code _) -> if code < 80
                                             then putStr ""
                                             else do
                                                 print val

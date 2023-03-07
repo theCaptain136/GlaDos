@@ -20,19 +20,19 @@ removeLastArray :: ([[Symbol]], [Value]) -> ([[Symbol]], [Value])
 removeLastArray ((_:xs), stack) = (xs, stack)
 
 eval :: ([[Symbol]], [Value]) -> Expression -> ([[Symbol]], [Value])
-eval (env, stack) (Value (ValueError (Error 1 empty)) name') = findSymbol env env stack name' [] (Value (ValueError (Error 1 empty)))
+eval (env, stack) (Value (ValueError (Error 1 empty)) name') = findSymbol env env stack name' [] (Value (ValueError (Error 1 empty)) name')
 eval (env, stack) (Value val _) = (env, val : stack)
 eval (env, stack) (Lambda [] (last : [])) = eval (env, stack) last
 eval ((x:xs), stack) (Lambda [] ((Define name' expr) : rest)) = eval ((((Symbol name' expr) : x) : xs), stack) (Lambda [] rest)
 eval (env, stack) (Lambda [] (_ : rest)) = eval (env, stack) (Lambda [] rest)
 eval ((x:xs), stack) (Lambda args functions) = removeLastArray (eval (([]:(args ++ x):xs), stack) (Lambda [] functions))
-eval (env, stack) (SymbolExpression name' args) = findSymbol env env stack name' args
+eval (env, stack) (SymbolExpression name' args) = findSymbol env env stack name' args (SymbolExpression name' args)
 eval (env, stack) (Plus expr1 expr2) = removeLastArray (applyop ([]:env) stack "Plus" expr1 expr2 (Plus expr1 expr2))
 eval (env, stack) (Minus expr1 expr2) = removeLastArray (applyop ([]:env) stack "Minus" expr1 expr2 (Minus expr1 expr2))
 eval (env, stack) (Times expr1 expr2) = removeLastArray (applyop ([]:env) stack "Times" expr1 expr2 (Times expr1 expr2))
 eval (env, stack) (Divided expr1 expr2) = removeLastArray (applyop ([]:env) stack "Divide" expr1 expr2 (Divided expr1 expr2))
 eval (env, stack) (Modulo expr1 expr2) = removeLastArray (applyop ([]:env) stack "Modula" expr1 expr2 (Modulo expr1 expr2))
-eval ((x:xs), stack) (Define name' expr) = ((((Symbol name' expr):x) : xs), (ValueError (Error 0)) : stack)
+eval ((x:xs), stack) (Define name' expr) = ((((Symbol name' expr):x) : xs), (ValueError (Error 0 (Empty 0))) : stack)
 eval (env, stack) (Equal expr1 expr2) = removeLastArray (applyop ([]:env) stack "Equal" expr1 expr2 (Equal expr1 expr2))
 eval (env, stack) (Smaller expr1 expr2) = removeLastArray (applyop ([]:env) stack "Smaller" expr1 expr2 (Smaller expr1 expr2))
 eval (env, stack) (Condition ifExpr thenExpr elseExpr) = removeLastArray (applyCond ([]:env) (snd (eval (([]:env), stack) ifExpr)) thenExpr elseExpr (Condition ifExpr thenExpr elseExpr))
@@ -49,7 +49,7 @@ findSymbol ([]:xs) env' stack name' args err = findSymbol xs env' stack name' ar
 findSymbol (((Symbol name'' (Lambda args' exprs)) : _) : _) env' stack name' args _
           | name' == name'' = removeLastArray (eval (env', stack) (Lambda (fuseArgs args' args) exprs))
 findSymbol (((Symbol name'' expr) : _) : _) env' stack name' [] _ | name'' == name'  = eval (env', stack) expr
-findSymbol (((Symbol name'' _) : _) : _) env' stack name' _ _ | name'' == name' = (env', (ValueError (Error 85 err)) : stack)
+findSymbol (((Symbol name'' _) : _) : _) env' stack name' _ err | name'' == name' = (env', (ValueError (Error 85 err)) : stack)
 findSymbol ((_ : xs) : xss) env' stack name' args err = findSymbol (xs : xss) env' stack name' args err
 
 applyCond :: [[Symbol]] -> [Value] -> Expression -> Expression -> Expression -> ([[Symbol]], [Value])
@@ -75,6 +75,8 @@ operate "Equal" (ValueInt v1) (ValueInt v2) _
 operate "Smaller" (ValueInt v1) (ValueInt v2) _
       | v1 < v2 = (ValueBool True)
       | otherwise = (ValueBool False)
+operate "Equal" _ _ err = (ValueError (Error 82 err))
+operate "Smaller" _ _ err = (ValueError (Error 82 err))
 operate "Plus" (ValueInt v1) (ValueInt v2) _ = (ValueInt (v1 + v2))
 operate "Minus" (ValueInt v1) (ValueInt v2) _ = (ValueInt (v1 - v2))
 operate "Times" (ValueInt v1) (ValueInt v2) _ = (ValueInt (v1 * v2))
@@ -82,4 +84,4 @@ operate "Divide" (ValueInt _) (ValueInt 0) err = (ValueError (Error 83 err))
 operate "Modula" (ValueInt _) (ValueInt 0) err = (ValueError (Error 83 err))
 operate "Divide" (ValueInt v1) (ValueInt v2) _ = (ValueInt (div v1 v2))
 operate "Modula" (ValueInt v1) (ValueInt v2) _ = (ValueInt (mod v1 v2))
-operate _ _ _ err = (ValueError (Error 82 err))
+operate _ _ _ err = (ValueError (Error 83 err))

@@ -19,6 +19,7 @@ import Data.List
 data Symbol = Symbol {name :: String, rep :: Expression}
 
 instance Show Symbol where
+    show (Symbol "" rep) = show rep
     show (Symbol name rep) = "(" ++ show name ++ " " ++ show rep ++ ")"
 
 -- Error is used as a data type to determine what error caused the programm to exit.
@@ -32,7 +33,15 @@ instance Show Symbol where
 data Error = Error {code :: Int, cause :: Expression}
 
 instance Show Error where
-    show (Error code cause) = "Error Code: " ++ show code ++ " occured in: " ++ show cause
+    show (Error 80 (Value _ name)) = "Value not definied " ++ show name
+    show (Error 80 cause) = "Symbol not defined in " ++ show cause
+    show (Error 81 cause) = "recursion limit reached (100)"
+    show (Error 82 cause) = "invalid comparison in " ++ show cause
+    show (Error 83 cause) = "invalid mathematic action in " ++ show cause
+    show (Error 85 cause) = "invalid number of arguments in " ++ show cause
+    show (Error 86 cause) = "invalid syntax"
+    show (Error 87 cause) = "expected a value"
+    show (Error code cause) = "Error Code: " ++ show code ++ " occurred in: " ++ show cause
 
 -- Error list:
 -- 0 = OK (used as a return value for define)
@@ -41,7 +50,7 @@ instance Show Error where
 -- 81 = recursion limit reached
 -- 82 = invalid comparison
 -- 83 = invalid mathematic action
--- 84 = invalid use data type
+-- 84
 -- 85 = invalid number of args
 -- 86 = invalid syntax
 -- 87 = expected a value
@@ -49,7 +58,13 @@ instance Show Error where
 -- Value will be every type of value possible and then can be used for patternmatching during evaluation.
 -- e.g.: Plus expects two values as input, but with patternmatching inside the function it will be determined if you try add a Int to a Bool.
 
-data Value = ValueInt Int | ValueBool Bool| ValueError Error deriving Show
+data Value = ValueInt Int | ValueBool Bool| ValueError Error
+
+instance Show Value where
+    show (ValueInt int) = show int
+    show (ValueBool True) = "#t"
+    show (ValueBool False) = "#f"
+    show (ValueError error) = show error 
 
 -- Every Expression can be evaluated with the evaluateExpression function.
 -- SymbolExpression is used when you want to evaluate a Symbol. The argsSymbol are used if you want to execute a lambda function which needs arguments. In that case they will be assigned in order.
@@ -75,8 +90,8 @@ data Expression =   Value {value :: Value, valueName :: String} |
                     Empty Int
 
 instance Show Expression where
-    show (Value value valueName) = "(" ++ valueName ++ ":" ++ show value ++ ")"
-    show (SymbolExpression symbolName argsSymbol) = "(" ++ symbolName ++ "(" ++ intercalate "," (map show argsSymbol) ++ ")" ++ ")"
+    show (Value value valueName) = show value
+    show (SymbolExpression symbolName argsSymbol) = "(" ++ symbolName ++ " " ++ intercalate " " (map show argsSymbol) ++ ")"
     show (Lambda args functions) = "(lambda" ++ "(" ++ intercalate "," (map show args) ++ ")" ++ "(" ++ intercalate "," (map show functions) ++ "))"
     show (Plus a b) = "(" ++ show a ++ " + " ++ show b ++ ")"
     show (Minus a b) = "(" ++ show a ++ " - " ++ show b ++ ")"
