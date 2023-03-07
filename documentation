@@ -16,8 +16,11 @@ syntax Bool ::= "#t" | "#f" ;
 -- Example: (1)
 -- Example: (#f)
 
+syntax Mod ::= "mod" | "%" ;
+syntax Div ::= "div" | "/" ;
+syntax Equal ::= "eq?" | "=" | "==" ;
 syntax ArithmeticExpr ::= Operator Expr Expr ;
-syntax Operator ::= "+" | "-" | "*" | "div" | "mod" | "eq?" | "<" ;
+syntax Operator ::= "+" | "-" | "*" | "div" | "mod" | Equal | "<" ;
 
 -- Example: (+ 1 2)
 -- Example: (- 5 3)
