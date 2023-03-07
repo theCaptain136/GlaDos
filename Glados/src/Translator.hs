@@ -40,7 +40,7 @@ stringToInt :: String -> Int
 stringToInt str = read str :: Int
 
 createExpression :: [String] -> Expression
-createExpression scm = translator scm 0 1
+createExpression scm = translator scm 0 1 Nothing
 
 getNext :: [String] -> [String] -> Int -> ([String], [String])
 getNext []  save c = (save, [])
@@ -49,78 +49,111 @@ getNext ("(":xs) save c = getNext xs (save ++ ["("]) (c+1)
 getNext (")":xs) save c = getNext xs (save ++ [")"]) (c-1)
 getNext (x:xs) save c = getNext xs (save ++ [x]) c
 
-translator :: [String] -> Int -> Int -> Expression
-translator [] depth x | depth /= 0 = (Value (ValueError (Error 86)) "error")
-translator ((h:hs):xs) depth x  | depth <= 0 && h == ')' = (Value (ValueError (Error 86)) "error")
-                                | h == '(' = translator xs (depth+1) 0
-                                | h == ')' = translator xs (depth-1) 1
+getAtIndex :: [a] -> Int -> [a]
+getAtIndex xs idx
+    | idx >= 0 && idx < length xs = [(xs !! idx)]
+    | otherwise = []
 
-translator ("+":a:b:xs) depth 0 = let   n = (getNext (a:b:xs) [] 0)
+subStrEnd :: [a] -> Int -> [a]
+subStrEnd [] _ = []
+subStrEnd (x:xs) i  | i > 0 = subStrEnd xs (i-1)
+                    | otherwise = (x:xs)
+
+-- translator :: [String] -> Int -> Int -> Int -> Expression
+-- translator [] depth x i | depth /= 0 = (Value (ValueError (Error 86)) "error")
+-- translator scm depth x i    | (head (getAtIndex scm i)) == ")" depth <= 0 = (Value (ValueError (Error 86)) "error")
+--                             | (head (getAtIndex scm i)) == "(" = translator scm (depth+1) 0 (i+1)
+--                             | (head (getAtIndex scm i)) == ")" && depth == 1 = 
+--                             | (head (getAtIndex scm i)) == ")" && depth != 1 =
+
+mhead :: [String] -> String
+mhead (x:xs) = x
+mhead [] = []
+
+translator :: [String] -> Int -> Int -> Maybe Expression -> Expression
+translator [] depth x p | depth /= 0 = (Value (ValueError (Error 86)) "error")
+translator (x:xs) depth c p | depth <= 0 && x == ")" = (Value (ValueError (Error 86)) "error")
+                            | x == "(" = let    n = getNext (x:xs) [] 0
+                                                inf = (isInfix (mhead (snd n)))
+                                                call =  if inf
+                                                            then translator (snd n) (depth+1) 0 (Just (createExpression (fst n)))
+                                                            else translator xs (depth+1) 0 Nothing
+                                            in call
+                            | x == ")" = translator xs (depth-1) 1 Nothing
+
+translator ("+":a:b:xs) depth 0 p = let n = (getNext (a:b:xs) [] 0)
+                                        n2 = ( getNext (snd n) [] 0)
+                                        exp1 =  case p of
+                                                    Nothing  -> (translator (fst n) depth 1 p)
+                                                    Just exp -> exp
+                                        exp2 =  case p of
+                                                    Nothing  -> (translator (fst n2) depth 1 p)
+                                                    Just exp -> (translator (fst n) depth 1 p)
+                                    in
+                                        (Plus exp1 exp2) -- Plus function
+
+translator ("-":a:b:xs) depth 0 p = let n = (getNext (a:b:xs) [] 0)
                                         n2 = ( getNext (snd n) [] 0)
                                     in
-                                        (Plus (translator (fst n) depth 1) (translator (fst n2) depth 1)) -- Plus function
+                                        (Minus (translator (fst n) depth 1 p) (translator (fst n2) depth 1 p)) -- Minus function
 
-translator ("-":a:b:xs) depth 0 = let   n = (getNext (a:b:xs) [] 0)
+translator ("*":a:b:xs) depth 0 p = let n = (getNext (a:b:xs) [] 0)
                                         n2 = ( getNext (snd n) [] 0)
                                     in
-                                        (Minus (translator (fst n) depth 1) (translator (fst n2) depth 1)) -- Minus function
+                                        (Times (translator (fst n) depth 1 p) (translator (fst n2) depth 1 p)) -- Times function
 
-translator ("*":a:b:xs) depth 0 = let   n = (getNext (a:b:xs) [] 0)
-                                        n2 = ( getNext (snd n) [] 0)
-                                    in
-                                        (Times (translator (fst n) depth 1) (translator (fst n2) depth 1)) -- Times function
-
-translator ("div":a:b:xs) depth 0 = let n = (getNext (a:b:xs) [] 0)
-                                        n2 = ( getNext (snd n) [] 0)
-                                    in
-                                        (Divided (translator (fst n) depth 1) (translator (fst n2) depth 1)) -- Divided function
-
-translator ("mod":a:b:xs) depth 0 = let n = (getNext (a:b:xs) [] 0)
-                                        n2 = ( getNext (snd n) [] 0)
-                                    in
-                                        (Modulo (translator (fst n) depth 1) (translator (fst n2) depth 1)) -- Modulo function
-
-translator ("eq?":a:b:xs) depth 0 = let n = (getNext (a:b:xs) [] 0)
-                                        n2 = ( getNext (snd n) [] 0)
-                                    in
-                                        (Equal (translator (fst n) depth 1) (translator (fst n2) depth 1)) -- Equal function
-
-translator ("<":a:b:xs) depth 0 = let   n = (getNext (a:b:xs) [] 0)
-                                        n2 = ( getNext (snd n) [] 0)
-                                    in
-                                        (Smaller (translator (fst n) depth 1) (translator (fst n2) depth 1)) -- Smaller function
-
-
-translator ("if":a:b:xs) depth 0 = let  n = (getNext (a:b:xs) [] 0)
-                                        n2 = ( getNext (snd n) [] 0)
-                                        n3 = ( getNext (snd n2) [] 0)
-                                    in
-                                        (Condition (translator (fst n) depth 1) (translator (fst n2) depth 1) (translator (fst n3) depth 1)) -- Condition function
-
-translator ("define":a:b:xs) depth 0 = let  n = (getNext (a:b:xs) [] 0)
+translator ("div":a:b:xs) depth 0 p = let   n = (getNext (a:b:xs) [] 0)
                                             n2 = ( getNext (snd n) [] 0)
+                                        in
+                                            (Divided (translator (fst n) depth 1 p) (translator (fst n2) depth 1 p)) -- Divided function
+
+translator ("mod":a:b:xs) depth 0 p = let   n = (getNext (a:b:xs) [] 0)
+                                            n2 = ( getNext (snd n) [] 0)
+                                        in
+                                            (Modulo (translator (fst n) depth 1 p) (translator (fst n2) depth 1 p)) -- Modulo function
+
+translator ("eq?":a:b:xs) depth 0 p = let   n = (getNext (a:b:xs) [] 0)
+                                            n2 = ( getNext (snd n) [] 0)
+                                        in
+                                            (Equal (translator (fst n) depth 1 p) (translator (fst n2) depth 1 p)) -- Equal function
+
+translator ("<":a:b:xs) depth 0 p = let n = (getNext (a:b:xs) [] 0)
+                                        n2 = ( getNext (snd n) [] 0)
+                                    in
+                                        (Smaller (translator (fst n) depth 1 p) (translator (fst n2) depth 1 p)) -- Smaller function
+
+translator ("if":a:b:xs) depth 0 p = let    n = (getNext (a:b:xs) [] 0)
+                                            n2 = ( getNext (snd n) [] 0)
+                                            n3 = ( getNext (snd n2) [] 0)
+                                    in
+                                        (Condition (translator (fst n) depth 1 p) (translator (fst n2) depth 1 p) (translator (fst n3) depth 1 p)) -- Condition function
+
+translator ("define":a:b:xs) depth 0 p = let    n = (getNext (a:b:xs) [] 0)
+                                                n2 = ( getNext (snd n) [] 0)
                                     in
                                         (defineCall (fst n) (fst n2) 0)
 
-translator ("lambda":a:b:xs) depth 0 = let  n = (getNext (a:b:xs) [] 0)
-                                            n2 = expArray (snd n) []
-                                            arg = (strToSymbol (fst n) 0)
-                                            sym =   if null (snd n2)
-                                                        then Nothing
-                                                        else Just (strToSymbol (snd n2) 0)
-                                            res = case sym of
-                                                    Nothing -> arg
-                                                    Just s -> giveNames arg s
-                                    in
-                                        (Lambda res (fst n2) )
+translator ("lambda":a:b:xs) depth 0 p = let    n = (getNext (a:b:xs) [] 0)
+                                                n2 = expArray (snd n) []
+                                                arg = (strToSymbol (fst n) 0)
+                                                sym =   if null (snd n2)
+                                                            then Nothing
+                                                            else Just (strToSymbol (snd n2) 0)
+                                                res = case sym of
+                                                        Nothing -> arg
+                                                        Just s -> giveNames arg s
+                                            in
+                                                (Lambda res (fst n2) )
 
-translator (x:xs) depth 0 = SymbolExpression x (strToSymbol xs 0)    -- custom functions
+translator (x:xs) depth c p | onlyNumbers x && c == 0 && nothing p = (translator xs depth 0 (Just (Value (ValueInt (stringToInt x)) ""))) -- only const values + variables
+                            | onlyNumbers x && c == 1 = (Value (ValueInt (stringToInt x)) "")
+                            | (isBool x) && c == 0 && nothing p = (translator xs depth 0 (Just (Value (ValueBool (toBool x)) "")))
+                            | (isBool x) && c == 1 = (Value (ValueBool (toBool x)) "")
+                            | c == 1 = Value (ValueError (Error 1)) x
+                            | c == 0 && (isInfix (mhead xs)) = (translator xs depth 0 (Just (Value (ValueError (Error 1)) x)))
+                            | c == 0 = (SymbolExpression x (strToSymbol xs 0))
 
-translator (x:xs) depth 1   | (onlyNumbers x) == True = Value (ValueInt (stringToInt x)) "" -- only const values + variables
-                            | (isBool x) == True = Value (ValueBool (toBool x)) ""
-                            | otherwise = Value (ValueError (Error 1)) x
-
-translator _ _ _ = (Value (ValueError (Error 900)) "error")
+translator _ _ _ _ = (Value (ValueError (Error 88)) "error")
 
 expArray :: [String] -> [Expression] -> ([Expression], [String])
 expArray [] e = (e, [])
@@ -168,3 +201,20 @@ getName :: [String] -> (String, [String])
 getName ("(":rs) = getName rs
 getName (h:rs) = (h, ("(":rs))
 getName [] = ("", [])
+
+isInfix :: String -> Bool
+isInfix expr =
+  case expr of
+    "+" -> True
+    "-" -> True
+    "+" -> True
+    "div" -> True
+    "mod" -> True
+    _ -> False
+
+nothing :: Maybe Expression -> Bool
+nothing a =    let res =   case a of
+                            Nothing -> True
+                            Just a  -> False
+        in
+            res
