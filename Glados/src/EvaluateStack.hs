@@ -25,7 +25,7 @@ eval (env, stack) (Value val _) = (env, val : stack)
 eval (env, stack) (Lambda [] (last : [])) = eval (env, stack) last
 eval ((x:xs), stack) (Lambda [] ((Define name' expr) : rest)) = eval ((((Symbol name' expr) : x) : xs), stack) (Lambda [] rest)
 eval (env, stack) (Lambda [] (_ : rest)) = eval (env, stack) (Lambda [] rest)
-eval (env, stack) (Lambda args functions) = removeLastArray (eval (args : env, stack) (Lambda [] functions))
+eval ((x:xs), stack) (Lambda args functions) = removeLastArray (eval (([]:(args ++ x):xs), stack) (Lambda [] functions))
 eval (env, stack) (SymbolExpression name' args) = findSymbol env env stack name' args
 eval (env, stack) (Plus expr1 expr2) = removeLastArray (applyop ([]:env) stack "Plus" expr1 expr2)
 eval (env, stack) (Minus expr1 expr2) = removeLastArray (applyop ([]:env) stack "Minus" expr1 expr2)
@@ -37,12 +37,17 @@ eval (env, stack) (Equal expr1 expr2) = removeLastArray (applyop ([]:env) stack 
 eval (env, stack) (Smaller expr1 expr2) = removeLastArray (applyop ([]:env) stack "Smaller" expr1 expr2)
 eval (env, stack) (Condition ifExpr thenExpr elseExpr) = removeLastArray (applyCond ([]:env) (snd (eval (([]:env), stack) ifExpr)) thenExpr elseExpr)
 
+fuseArgs :: [Symbol] -> [Symbol] -> [Symbol]
+fuseArgs [] _ = []
+fuseArgs ((Symbol name' (Value (ValueError (Error 1)) _)):xs) [] = []
+fuseArgs ((Symbol name' (Value (ValueError (Error 1)) _)):xs) (y:ys) = (Symbol name' (rep y)) : (fuseArgs xs ys)
+fuseArgs ((Symbol name' expr'):xs) args = (Symbol name' expr') : (fuseArgs xs args)
+
 findSymbol :: [[Symbol]] -> [[Symbol]] -> [Value] -> String -> [Symbol] -> ([[Symbol]], [Value])
 findSymbol [] env' stack _ _ = (env', (ValueError (Error 80)) : stack)
 findSymbol ([]:xs) env' stack name' args = findSymbol xs env' stack name' args
 findSymbol (((Symbol name'' (Lambda args' exprs)) : _) : _) env' stack name' args
-          | name' == name'' && length args == length args' = removeLastArray (eval (env', stack) (Lambda args' exprs))
-          | name' == name'' && otherwise = (env', (ValueError (Error 85)) : stack)
+          | name' == name'' = removeLastArray (eval (env', stack) (Lambda (fuseArgs args' args) exprs))
 findSymbol (((Symbol name'' expr) : _) : _) env' stack name' [] | name'' == name'  = eval (env', stack) expr
 findSymbol (((Symbol name'' _) : _) : _) env' stack name' _ | name'' == name' = (env', (ValueError (Error 85)) : stack)
 findSymbol ((_ : xs) : xss) env' stack name' args = findSymbol (xs : xss) env' stack name' args
