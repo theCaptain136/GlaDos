@@ -88,6 +88,11 @@ for s in "${STRINGS[@]}"; do
                 echo -e "${GREEN}Test Successful!${NC}"
             else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             fi
+        elif [[ $s == "./Glados/test/lambdaWithValueAlt30.scm" ]]; then
+            if [[ $NUMBER == 30 ]]; then
+                echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
+            fi
         fi
     fi
 done
