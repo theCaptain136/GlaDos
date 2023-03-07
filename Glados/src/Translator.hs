@@ -71,8 +71,8 @@ mhead (x:xs) = x
 mhead [] = []
 
 translator :: [String] -> Int -> Int -> Maybe Expression -> Expression
-translator [] depth x p | depth /= 0 = (Value (ValueError (Error 86)) "error")
-translator (x:xs) depth c p | depth <= 0 && x == ")" = (Value (ValueError (Error 86)) "error")
+translator [] depth x p | depth /= 0 = (Value (ValueError (Error 86 (Empty 0))) "error")
+translator (x:xs) depth c p | depth <= 0 && x == ")" = (Value (ValueError (Error 86 (Empty 0))) "error")
                             | x == "(" = let    n = getNext (x:xs) [] 0
                                                 inf = (isInfix (mhead (snd n)))
                                                 call =  if inf
@@ -149,11 +149,11 @@ translator (x:xs) depth c p | onlyNumbers x && c == 0 && nothing p = (translator
                             | onlyNumbers x && c == 1 = (Value (ValueInt (stringToInt x)) "")
                             | (isBool x) && c == 0 && nothing p = (translator xs depth 0 (Just (Value (ValueBool (toBool x)) "")))
                             | (isBool x) && c == 1 = (Value (ValueBool (toBool x)) "")
-                            | c == 1 = Value (ValueError (Error 1)) x
-                            | c == 0 && (isInfix (mhead xs)) = (translator xs depth 0 (Just (Value (ValueError (Error 1)) x)))
+                            | c == 1 = Value (ValueError (Error 1 (Empty 0))) x
+                            | c == 0 && (isInfix (mhead xs)) = (translator xs depth 0 (Just (Value (ValueError (Error 1 (Empty 0))) x)))
                             | c == 0 = (SymbolExpression x (strToSymbol xs 0))
 
-translator _ _ _ _ = (Value (ValueError (Error 88)) "error")
+translator _ _ _ _ = (Value (ValueError (Error 88 (Empty 0))) "error")
 
 expArray :: [String] -> [Expression] -> ([Expression], [String])
 expArray [] e = (e, [])
@@ -183,13 +183,13 @@ strToSymbol (")":rs) 0 = strToSymbol rs 1
 strToSymbol ("(":rs) 0 = strToSymbol rs 1
 strToSymbol (h:rs) c | onlyNumbers h = ((Symbol "" (Value (ValueInt (stringToInt h)) "")):strToSymbol rs (c+1))
                     | isBool h = ((Symbol "" (Value (ValueBool (toBool h)) "")):strToSymbol rs (c+1))
-                    | h /= "(" && h /= ")" = (Symbol h (Value (ValueError (Error 1)) h):strToSymbol rs (c+1))
+                    | h /= "(" && h /= ")" = (Symbol h (Value (ValueError (Error 1 (Empty 0))) h):strToSymbol rs (c+1))
                     | h == "(" = let    exp = getNext (h:rs) [] 0
                                 in
                                     ((Symbol "" (createExpression (fst exp))):strToSymbol (snd exp) (c+1))
 
 defineCall :: [String] -> [String] -> Int -> Expression
-defineCall [] _ _ = (Value (ValueError (Error 90)) "")
+defineCall [] _ _ = (Value (ValueError (Error 90 (Empty 0))) "")
 defineCall a b 0    | (head a) == "(" = let    name = getName (a)
                                         in
                                             (Define (fst name) (Lambda (strToSymbol (snd name) 0) [(createExpression b)]))

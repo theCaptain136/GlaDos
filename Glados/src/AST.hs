@@ -12,9 +12,14 @@ module AST (
     Value (..)
     ) where
 
+import Data.List
+
 -- The rep of a Symbol can be any Expression. In case of a value it is for example (Value (ValueInt 69)).
 
 data Symbol = Symbol {name :: String, rep :: Expression}
+
+instance Show Symbol where
+    show (Symbol name rep) = "(" ++ show name ++ " " ++ show rep ++ ")"
 
 -- Error is used as a data type to determine what error caused the programm to exit.
 -- When an error occurs the (ValueError (Error x)) will be returned.
@@ -24,7 +29,10 @@ data Symbol = Symbol {name :: String, rep :: Expression}
 -- The error code 1 is used when a value doesn't have a actual value yet, but will be available as a symbol during execution.
 -- In that case it will search the symbols for a symbol with the same name as the value. If a function is found first, it will result in an error.
 
-data Error = Error Int deriving Show
+data Error = Error {code :: Int, cause :: Expression}
+
+instance Show Error where
+    show (Error code cause) = "Error Code: " ++ show code ++ " occured in: " ++ show cause
 
 -- Error list:
 -- 0 = OK (used as a return value for define)
@@ -63,4 +71,20 @@ data Expression =   Value {value :: Value, valueName :: String} |
                     Define {defineName :: String, defined :: Expression} |
                     Equal {firstValueEqual :: Expression, secondValueEqual :: Expression} |
                     Smaller {firstValueSmaller :: Expression, secondValueSmaller :: Expression} |
-                    Condition {ifValue :: Expression, thenExpression :: Expression, elseExpression :: Expression}
+                    Condition {ifValue :: Expression, thenExpression :: Expression, elseExpression :: Expression} |
+                    Empty Int
+
+instance Show Expression where
+    show (Value value valueName) = "(" ++ valueName ++ ":" ++ show value ++ ")"
+    show (SymbolExpression symbolName argsSymbol) = "(" ++ symbolName ++ "(" ++ intercalate "," (map show argsSymbol) ++ ")" ++ ")"
+    show (Lambda args functions) = "(lambda" ++ "(" ++ intercalate "," (map show args) ++ ")" ++ "(" ++ intercalate "," (map show functions) ++ "))"
+    show (Plus a b) = "(" ++ show a ++ " + " ++ show b ++ ")"
+    show (Minus a b) = "(" ++ show a ++ " - " ++ show b ++ ")"
+    show (Divided a b) = "(" ++ show a ++ " / " ++ show b ++ ")"
+    show (Times a b) = "(" ++ show a ++ " * " ++ show b ++ ")"
+    show (Modulo a b) = "(" ++ show a ++ " % " ++ show b ++ ")"
+    show (Define name defined) = "(" ++ name ++ " = " ++ show defined ++ ")"
+    show (Equal a b) = "(" ++ show a ++ " == " ++ show b ++ ")"
+    show (Smaller a b) = "(" ++ show a ++ " < " ++ show b ++ ")"
+    show (Condition i t e) = "(if " ++ show i ++ " then " ++ show t ++ " else " ++ show e ++ ")"
+    show (Empty n) = "empty " ++ show n
