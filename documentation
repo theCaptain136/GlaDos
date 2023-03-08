@@ -14,7 +14,7 @@ syntax Bool ::= "#t" | "#f" ;
 
 syntax Mod ::= "mod" | "%" ;
 syntax Div ::= "div" | "/" ;
-syntax Equal ::= "eq?" | "=" | "==" ;
+syntax Equal ::= "eq?" | "==" ;
 syntax ArithmeticExpr ::= Operator Expr Expr ;
 syntax ArithmeticExpr ::= Expr Operator Expr ;
 syntax Operator ::= "+" | "-" | "*" | Div | Mod | Equal | "<" ;
@@ -34,8 +34,10 @@ syntax IfExpr ::= "if" Expr "then" Expr "else" Expr ;
 -- Example: (if #t 1 2)
 
 syntax DefineExpr ::= "define" [a-zA-Z]+ Expr ;
+syntax DefineExpr ::= [a-zA-Z] "="+ Expr ;
 
 -- Example: (define a 42)
+-- Example: (a = 42)
 -- Example: (define foo (lambda (x y) (+ x y)))
 -- Example: (define foo (x y) (+ x y))
 
