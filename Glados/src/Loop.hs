@@ -51,7 +51,7 @@ loop input env c = do
     let (res, rest, newEnv) = (singleExpression input env c)
     let t = getNext input [] 0
     case res of
-        ValueError (Error code) -> if code < 80
+        ValueError (Error code (Empty 0)) -> if code < 80
                                     then putStr ""
                                     else do
                                         print res
@@ -65,7 +65,7 @@ loop input env c = do
     loop rest (newEnv) c
 
 activeLoop :: [String] -> [[Symbol]] -> (Value, [[Symbol]])
-activeLoop [] _ = ((ValueError (Error 86)), ([[]]))
+activeLoop [] _ = ((ValueError (Error 86 (Empty 0))), ([[]]))
 activeLoop input env = let (v, r, e) = singleExpression input env 0
                 in
                     (v, e)
@@ -80,7 +80,7 @@ inputLoop env = do
             let input = (convert (parser line []))
             let (val, e) = activeLoop input env
             case val of
-                ValueError (Error code) -> if code < 80
+                ValueError (Error code _) -> if code < 80
                                             then putStr ""
                                             else do
                                                 print val
