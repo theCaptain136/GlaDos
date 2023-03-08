@@ -249,7 +249,7 @@ isInfix expr =
     "=" -> True
     "+" -> True
     "-" -> True
-    "+" -> True
+    "*" -> True
     "div" -> True
     "mod" -> True
     _ -> False
