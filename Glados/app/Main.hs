@@ -23,11 +23,6 @@ getRep symbol = rep symbol
 getSyName :: Symbol -> String
 getSyName symbol = name symbol
 
-getItemAtIndex :: [Symbol] -> Int -> Symbol
-getItemAtIndex xs idx
-  | idx >= 0 && idx < length xs = (xs !! idx)
-  | otherwise = Symbol "error" (Value(ValueError (Error 90)) "")
-
 main :: IO ()
 main = do
   args <- getArgs
@@ -38,7 +33,7 @@ main = do
       let path = head args
       inputAsFile <- readFile path
       let str = inputAsFile
-      let a = parser str []
+      let a = (convert (parser str []))
       loop a [[]] 0
       exitSuccess
 

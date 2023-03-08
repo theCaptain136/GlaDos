@@ -1,0 +1,71 @@
+-- Define the syntax of the Glados language
+syntax Program ::= Expr+ ;
+
+syntax Expr ::= "(" Expression ")" ;
+
+syntax Expression ::= Value | ArithmeticExpr | IfExpr | DefineExpr | LambdaExpr | Symbol ;
+
+syntax Value ::= Int | Bool
+syntax Int ::= [0-9]+ ;
+syntax Bool ::= "#t" | "#f" ;
+
+-- Example: (1)
+-- Example: (#f)
+
+syntax Mod ::= "mod" | "%" ;
+syntax Div ::= "div" | "/" ;
+syntax Equal ::= "eq?" | "==" ;
+syntax ArithmeticExpr ::= Operator Expr Expr ;
+syntax ArithmeticExpr ::= Expr Operator Expr ;
+syntax Operator ::= "+" | "-" | "*" | Div | Mod | Equal | "<" ;
+
+-- Example: (+ 1 2)
+-- Example: (- 5 3)
+-- Example: (* 4 6)
+-- Example: (div 10 2)
+-- Example: (mod 10 3)
+-- Example: (eq? 1 1)
+-- Example: (eq? #t #f)
+-- Example: (< 5 10)
+
+syntax IfExpr ::= "if" Expr Expr Expr ;
+syntax IfExpr ::= "if" Expr "then" Expr "else" Expr ;
+
+-- Example: (if #t 1 2)
+
+syntax DefineExpr ::= "define" [a-zA-Z]+ Expr ;
+syntax DefineExpr ::= [a-zA-Z] "="+ Expr ;
+
+-- Example: (define a 42)
+-- Example: (a = 42)
+-- Example: (define foo (lambda (x y) (+ x y)))
+-- Example: (define foo (x y) (+ x y))
+
+syntax LambdaExpr ::= "lambda" "(" Symbol* ")" Expr+ ;
+
+-- Example: (lambda (x y) (+ x y))
+-- Example: (lambda () (+ 1 2))
+
+syntax Symbol ::= [a-zA-Z0-9]+ Expr*
+
+-- Example: (a)
+-- Example: (foo 1 2)
+
+-- Arithmetic expressions allow for addition, subtraction, multiplication,
+-- division, modulo, equality, and comparison operations on integers.
+-- Bool values don't have an integer value assigned to them, it is therefore not possible
+-- to perform an arithmetic operation between a bool and an integer.
+
+-- Define expressions allow you to set an expression or value to a symbol, which you can
+-- later use in operations.
+
+-- If expressions allow for conditional execution of code.
+-- All three (if, then and else) expressions are manditory.
+
+-- Lambda expressions allow you to define user-defined functions consisting of expressions.
+
+-- Example program:
+(define square (lambda (z) (* z z)))
+(define x 5)
+(define y 7)
+(if (< x y) then (square x) else (square y))
