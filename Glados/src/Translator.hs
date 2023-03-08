@@ -63,6 +63,18 @@ mhead :: [String] -> String
 mhead (x:xs) = x
 mhead [] = []
 
+noMaybe :: Maybe Expression -> Expression
+noMaybe x = let res =   case x of
+                            Just a -> a
+            in res
+
+getValueString :: Expression -> String
+getValueString (Value v str) = str
+
+isError1 :: Expression -> Bool
+isError1 (Value (ValueError (Error 1 _)) _) = True
+isError1 _ = False
+
 translator :: [String] -> Int -> Int -> Maybe Expression -> Expression
 translator [] depth x p | depth /= 0 = (Value (ValueError (Error 86 (Empty 0))) "error")
 translator (x:xs) depth c p | depth <= 0 && x == ")" = (Value (ValueError (Error 86 (Empty 0))) "error")
@@ -73,6 +85,10 @@ translator (x:xs) depth c p | depth <= 0 && x == ")" = (Value (ValueError (Error
                                                             else translator xs (depth+1) 0 Nothing
                                             in call
                             | x == ")" = translator xs (depth-1) 1 Nothing
+
+translator ("=":a:b:xs) depth 0 p   | nothing p == False && isError1 (noMaybe p) = let  n = (getNext (a:b:xs) [] 0)
+                                                                                        p2 = noMaybe p
+                                    in (Define (getValueString (p2)) (createExpression (fst n))) -- Plus function
 
 translator ("+":a:b:xs) depth 0 p = let n = (getNext (a:b:xs) [] 0)
                                         n2 = ( getNext (snd n) [] 0)
@@ -230,6 +246,7 @@ getName [] = ("", [])
 isInfix :: String -> Bool
 isInfix expr =
   case expr of
+    "=" -> True
     "+" -> True
     "-" -> True
     "+" -> True
