@@ -1,1 +1,5 @@
-(if #f then (5 + 5) else (10 + 5))
+(
+    if #f 
+        then 10
+        else 15
+)
