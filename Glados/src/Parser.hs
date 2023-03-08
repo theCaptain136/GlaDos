@@ -19,6 +19,7 @@ convert [] = []
 convert (x:xs)  | x == "=" || x == "==" || x == "eq?" = ("eq?":convert xs)
 convert (x:xs)  | x == "/" || x == "div" = ("div":convert xs)
 convert (x:xs)  | x == "%" || x == "mod" = ("mod":convert xs)
+convert (x:xs)  | x == "then" || x == "else" = (convert xs)
                 | otherwise = (x:convert xs)
 
 parser :: String -> String -> [String]

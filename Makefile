@@ -9,20 +9,20 @@ NAME     =    glados
 
 RM         =    @rm -f
 
-SRC	=	Glados/app/Main.hs			\
-		Glados/src/AST.hs			\
-		Glados/src/Evaluate.hs		\
-		Glados/src/Lib.hs			\
-		Glados/src/Loop.hs			\
-		Glados/src/Parser.hs		\
+SRC	=	Glados/app/Main.hs				\
+		Glados/src/AST.hs				\
+		Glados/src/Evaluate.hs			\
+		Glados/src/Lib.hs				\
+		Glados/src/Loop.hs				\
+		Glados/src/Parser.hs			\
 		Glados/src/Translator.hs
 
-SRC_STACK	=	Glados/app/Main.hs			\
-				Glados/src/AST.hs			\
-				Glados/src/EvaluateStack.hs	\
-				Glados/src/Lib.hs			\
-				Glados/src/Loop.hs			\
-				Glados/src/Parser.hs		\
+SRC_STACK	=	Glados/app/Main.hs				\
+				Glados/src/AST.hs				\
+				Glados/src/EvaluateStack.hs		\
+				Glados/src/Lib.hs				\
+				Glados/src/Loop.hs				\
+				Glados/src/Parser.hs			\
 				Glados/src/Translator.hs
 
 OBJ	=	$(patsubst %.hs,%.o,$(SRC)) $(patsubst %.hs,%.hi,$(SRC))

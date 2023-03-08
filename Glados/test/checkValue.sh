@@ -93,6 +93,21 @@ for s in "${STRINGS[@]}"; do
                 echo -e "${GREEN}Test Successful!${NC}"
             else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
             fi
+        elif [[ $s == "./Glados/test/multipleInfix11.scm" ]]; then
+            if [[ $NUMBER == 11 ]]; then
+                echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
+            fi
+        elif [[ $s == "./Glados/test/if10.scm" ]]; then
+            if [[ $NUMBER == 10 ]]; then
+                echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
+            fi
+        elif [[ $s == "./Glados/test/ifAlt15.scm" ]]; then
+            if [[ $NUMBER == 15 ]]; then
+                echo -e "${GREEN}Test Successful!${NC}"
+            else echo -e "${RED}Executable returned with exit code $EXIT_CODE (failure)${NC}"
+            fi
         fi
     fi
 done
